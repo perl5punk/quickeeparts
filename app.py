@@ -8,6 +8,7 @@ app = Flask(__name__)
 os.makedirs(app.instance_path, exist_ok=True)
 
 DATABASE = os.path.join(app.instance_path, 'junk.db')
+app.config['DATABASE'] = DATABASE
 
 
 def get_db():
