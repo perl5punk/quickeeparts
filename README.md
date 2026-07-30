@@ -1,2 +1,2 @@
 # quickeeparts
-It does the parts
+QuickeeParts - junk parts inventory system
