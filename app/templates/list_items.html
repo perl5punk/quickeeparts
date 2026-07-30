@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Junk Items - QuickeeParts{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Junk Items</h2>
+    <a href="/items/new" class="btn btn-primary">Add New Item</a>
+</div>
+
+{% if items %}
+<div class="item-grid">
+    {% for item in items %}
+    <div class="item-card">
+        {% if item.photo_filename %}
+        <a href="/items/{{ item.id }}">
+            <img src="/static/uploads/thumbnails/{{ item.photo_filename.rsplit('.', 1)[0] }}_thumb.jpg"
+                 alt="{{ item.name }}"
+                 onerror="this.onerror=null; this.src='/static/images/placeholder.png';">
+        </a>
+        {% else %}
+        <a href="/items/{{ item.id }}">
+            <img src="/static/images/placeholder.png" alt="No photo">
+        </a>
+        {% endif %}
+        <div class="item-card-body">
+            <h3><a href="/items/{{ item.id }}" style="color: inherit; text-decoration: none;">{{ item.name }}</a></h3>
+            <p>{{ item.description[:100] if item.description else 'No description' }}{% if item.description and item.description|length > 100 %}...{% endif %}</p>
+            {% if item.category %}
+            <p>Category: {{ item.category }}</p>
+            {% endif %}
+            <span class="status status-{{ item.status }}">{{ item.status }}</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>No junk items yet. <a href="/items/new">Add one!</a></p>
+{% endif %}
+{% endblock %}
