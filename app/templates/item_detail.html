@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ item.name }} - QuickeeParts{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>{{ item.name }}</h2>
+    <a href="/items/{{ item.id }}/edit" class="btn btn-primary">Edit Item</a>
+</div>
+
+<div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    {% if item.photo_filename %}
+    <img src="/static/uploads/{{ item.photo_filename }}"
+         alt="{{ item.name }}"
+         class="detail-image"
+         onerror="this.onerror=null; this.src='/static/images/placeholder.png';">
+    {% else %}
+    <img src="/static/images/placeholder.png" alt="No photo" class="detail-image">
+    {% endif %}
+
+    {% if item.description %}
+    <p style="margin-bottom: 1rem; white-space: pre-wrap;">{{ item.description }}</p>
+    {% endif %}
+
+    <dl class="detail-info">
+        <dt>Category</dt>
+        <dd>{{ item.category or 'N/A' }}</dd>
+
+        <dt>Status</dt>
+        <dd><span class="status status-{{ item.status }}">{{ item.status }}</span></dd>
+
+        <dt>Condition</dt>
+        <dd>{{ item.condition or 'N/A' }}</dd>
+
+        <dt>Created</dt>
+        <dd>{{ item.created_at.strftime('%Y-%m-%d %H:%M') if item.created_at else 'N/A' }}</dd>
+
+        <dt>Updated</dt>
+        <dd>{{ item.updated_at.strftime('%Y-%m-%d %H:%M') if item.updated_at else 'N/A' }}</dd>
+    </dl>
+</div>
+{% endblock %}
