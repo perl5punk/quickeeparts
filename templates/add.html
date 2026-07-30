@@ -2,29 +2,62 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>QuickeeParts — Add Junk</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Junk — QuickeeParts</title>
     <style>
-        body { font-family: sans-serif; margin: 40px; }
-        h1 { color: #333; }
-        label { display: block; margin-top: 10px; }
-        input[type="text"], textarea { width: 300px; padding: 5px; }
-        input[type="submit"] { margin-top: 15px; padding: 8px 16px; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 80px;
+        }
+        button {
+            margin-top: 15px;
+            padding: 8px 20px;
+            cursor: pointer;
+        }
+        nav a {
+            margin-right: 15px;
+        }
     </style>
 </head>
 <body>
-    <h1>QuickeeParts — Add Junk</h1>
+    <h1>Add Junk Item</h1>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/list">View All Junk</a>
+    </nav>
     <form method="POST" action="/add">
-        <label>Name:
-            <input type="text" name="name" required>
-        </label>
-        <label>Description:
-            <textarea name="description" rows="4" cols="40"></textarea>
-        </label>
-        <label>Category:
-            <input type="text" name="category">
-        </label>
-        <input type="submit" value="Add Junk">
+        <label for="name">Name (required)</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="description">Description</label>
+        <textarea id="description" name="description"></textarea>
+
+        <label for="category">Category</label>
+        <input type="text" id="category" name="category">
+
+        <button type="submit">Add Junk</button>
     </form>
-    <p><a href="/">Home</a> | <a href="/list">View All Junk</a></p>
 </body>
 </html>
