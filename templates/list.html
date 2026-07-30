@@ -2,17 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>QuickeeParts — Your Junk</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Junk — QuickeeParts</title>
     <style>
-        body { font-family: sans-serif; margin: 40px; }
-        h1 { color: #333; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f4f4f4; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        nav a {
+            margin-right: 15px;
+        }
     </style>
 </head>
 <body>
     <h1>Your Junk</h1>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/add">Add Junk</a>
+    </nav>
     {% if items %}
     <table>
         <thead>
@@ -26,10 +51,10 @@
         <tbody>
             {% for item in items %}
             <tr>
-                <td>{{ item[1] }}</td>
-                <td>{{ item[2] }}</td>
-                <td>{{ item[3] }}</td>
-                <td>{{ item[4] }}</td>
+                <td>{{ item['name'] }}</td>
+                <td>{{ item['description'] }}</td>
+                <td>{{ item['category'] }}</td>
+                <td>{{ item['date_added'] }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -37,6 +62,5 @@
     {% else %}
     <p>No junk items yet. Add some!</p>
     {% endif %}
-    <p><a href="/">Home</a> | <a href="/add">Add Junk</a></p>
 </body>
 </html>
