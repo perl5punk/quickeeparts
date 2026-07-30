@@ -12,35 +12,56 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
+@pytest.fixture
+def app_client():
+    """Create a test client for the Flask app."""
+    from app import app
+    app.config['TESTING'] = True
+    app.config['WTF_CSRF_ENABLED'] = False
+    with app.test_client() as client:
+        yield client
+
+
+@pytest.fixture
+def client_with_item(app_client):
+    """Add a junk item to the database."""
+    app_client.post('/add', data={
+        'name': 'Old Bolt',
+        'description': 'A rusty bolt',
+        'category': 'Hardware'
+    })
+    return app_client
+
+
 class TestFileStructure:
     """Test that all required files exist."""
 
     def test_app_py_exists(self):
-        assert os.path.isfile(os.path.join(os.path.dirname(__file__), '..', 'app.py'))
+        assert os.path.isfile(os.path.join(ROOT, 'app.py'))
 
     def test_requirements_txt_exists(self):
-        path = os.path.join(os.path.dirname(__file__), '..', 'requirements.txt')
+        path = os.path.join(ROOT, 'requirements.txt')
         assert os.path.isfile(path)
 
     def test_requirements_txt_contains_flask(self):
-        path = os.path.join(os.path.dirname(__file__), '..', 'requirements.txt')
+        path = os.path.join(ROOT, 'requirements.txt')
         content = open(path).read()
         assert 'flask' in content
 
     def test_templates_directory_exists(self):
-        path = os.path.join(os.path.dirname(__file__), '..', 'templates')
+        path = os.path.join(ROOT, 'templates')
         assert os.path.isdir(path)
 
     def test_index_html_exists(self):
-        path = os.path.join(os.path.dirname(__file__), '..', 'templates', 'index.html')
+        path = os.path.join(ROOT, 'templates', 'index.html')
         assert os.path.isfile(path)
 
     def test_add_html_exists(self):
-        path = os.path.join(os.path.dirname(__file__), '..', 'templates', 'add.html')
+        path = os.path.join(ROOT, 'templates', 'add.html')
         assert os.path.isfile(path)
 
     def test_list_html_exists(self):
-        path = os.path.join(os.path.dirname(__file__), '..', 'templates', 'list.html')
+        path = os.path.join(ROOT, 'templates', 'list.html')
         assert os.path.isfile(path)
 
 
@@ -59,18 +80,6 @@ class TestAppCreation:
 
 class TestRoutes:
     """Test all routes."""
-
-    @pytest.fixture(autouse=True)
-    def setup(self, app_client):
-        pass
-
-    @pytest.fixture
-    def app_client(self):
-        from app import app
-        app.config['TESTING'] = True
-        app.config['WTF_CSRF_ENABLED'] = False
-        with app.test_client() as client:
-            yield client
 
     def test_index_route(self, app_client):
         response = app_client.get('/')
@@ -119,16 +128,6 @@ class TestAddForm:
 class TestListItems:
     """Test listing items from the database."""
 
-    @pytest.fixture
-    def client_with_item(self, app_client):
-        # Add an item first
-        app_client.post('/add', data={
-            'name': 'Old Bolt',
-            'description': 'A rusty bolt',
-            'category': 'Hardware'
-        })
-        return app_client
-
     def test_list_shows_item(self, client_with_item):
         response = client_with_item.get('/list')
         assert b'Old Bolt' in response.data
@@ -173,17 +172,17 @@ class TestIndexTemplate:
     """Test index.html template content."""
 
     def test_index_has_title(self):
-        path = os.path.join(os.path.dirname(__file__), '..', 'templates', 'index.html')
+        path = os.path.join(ROOT, 'templates', 'index.html')
         content = open(path).read()
         assert 'QuickeeParts' in content
 
     def test_index_has_add_link(self):
-        path = os.path.join(os.path.dirname(__file__), '..', 'templates', 'index.html')
+        path = os.path.join(ROOT, 'templates', 'index.html')
         content = open(path).read()
         assert '/add' in content
 
     def test_index_has_list_link(self):
-        path = os.path.join(os.path.dirname(__file__), '..', 'templates', 'index.html')
+        path = os.path.join(ROOT, 'templates', 'index.html')
         content = open(path).read()
         assert '/list' in content
 
@@ -192,12 +191,12 @@ class TestListTemplate:
     """Test list.html template content."""
 
     def test_list_uses_items_variable(self):
-        path = os.path.join(os.path.dirname(__file__), '..', 'templates', 'list.html')
+        path = os.path.join(ROOT, 'templates', 'list.html')
         content = open(path).read()
         assert 'items' in content
 
     def test_list_has_no_junk_message(self):
-        path = os.path.join(os.path.dirname(__file__), '..', 'templates', 'list.html')
+        path = os.path.join(ROOT, 'templates', 'list.html')
         content = open(path).read()
         assert 'No junk items yet' in content or 'no junk' in content.lower()
 
@@ -209,7 +208,7 @@ class TestAppConfig:
         """Check that the main block uses the correct host and port."""
         import app as app_module
         # Verify app.run parameters by checking the source
-        source = open(os.path.join(os.path.dirname(__file__), '..', 'app.py')).read()
+        source = open(os.path.join(ROOT, 'app.py')).read()
         assert "'127.0.0.1'" in source or '"127.0.0.1"' in source
         assert '5000' in source
         assert 'debug=False' in source
