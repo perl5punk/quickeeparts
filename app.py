@@ -12,7 +12,7 @@ def create_app(config=None):
     # Ensure the instance directory exists for SQLite storage
     os.makedirs(app.instance_path, exist_ok=True)
 
-    # Default configuration
+    # Default application configuration
     app.config['SECRET_KEY'] = os.urandom(24)
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(app.instance_path, "app.db")}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
