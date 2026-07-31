@@ -1,6 +1,7 @@
 import os
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, g
+import uuid
+from flask import Flask, render_template, request, redirect, url_for, g, flash
 
 app = Flask(__name__)
 
