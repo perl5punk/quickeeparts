@@ -35,6 +35,9 @@ def test_agents_md_has_general_python_best_practices_section():
     assert "context manager" in content.lower() or "with" in content.lower(), (
         "Should mention context managers"
     )
+    assert "database" in content.lower() or "db" in content.lower(), (
+        "Should mention proper database initialization"
+    )
 
 
 def test_agents_md_has_making_changes_section():
