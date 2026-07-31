@@ -47,7 +47,7 @@ def close_db(exception):
 
 
 def init_db():
-    """Create the junk table if it does not exist."""
+    """Create the junk table if it does not exist, and migrate for photo_path."""
     db = get_db()
     db.execute('''
         CREATE TABLE IF NOT EXISTS junk (
@@ -58,6 +58,10 @@ def init_db():
             date_added DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    # Migrate: add photo_path column if it does not exist
+    columns = [row[1] for row in db.execute('PRAGMA table_info(junk)').fetchall()]
+    if 'photo_path' not in columns:
+        db.execute('ALTER TABLE junk ADD COLUMN photo_path TEXT')
     db.commit()
 
 
