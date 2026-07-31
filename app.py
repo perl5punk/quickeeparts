@@ -71,6 +71,12 @@ with app.app_context():
     init_db()
 
 
+@app.errorhandler(RequestEntityTooLarge)
+def too_large(error):
+    """Handle file size exceeding the limit."""
+    return 'File too large. Maximum size is 5 MB (5242880 bytes).', 400
+
+
 @app.route('/')
 def index():
     """Landing page with links to /add and /list."""
