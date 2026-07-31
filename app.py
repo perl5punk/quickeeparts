@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy  # Flask-SQLAlchemy for database support
+from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
@@ -38,4 +38,3 @@ def create_app(config=None):
 if __name__ == '__main__':
     app = create_app()
     app.run(debug=True)
-
