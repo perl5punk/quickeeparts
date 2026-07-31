@@ -5,8 +5,29 @@ from flask import Flask, render_template, request, redirect, url_for, g, flash
 
 app = Flask(__name__)
 
-# Ensure instance directory exists
+# Configuration
+app.config['SECRET_KEY'] = 'dev-key'
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5 MB
+UPLOAD_FOLDER = os.path.join(app.instance_path, 'photos')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Ensure instance and upload directories exist
 os.makedirs(app.instance_path, exist_ok=True)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+DATABASE = os.path.join(app.instance_path, 'junk.db')
+
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
+ALLOWED_MIME_TYPES = {'image/jpeg', 'image/png'}
+
+
+def secure_filename(filename):
+    """Generate a safe filename to prevent path traversal attacks."""
+    if '..' in filename or '/' in filename or '\\' in filename:
+        filename = os.path.basename(filename)
+    ext = filename.rsplit('.', 1)[1] if '.' in filename else ''
+    ext = ext.lower()
+    return f'{uuid.uuid4()}.{ext}'
 
 DATABASE = os.path.join(app.instance_path, 'junk.db')
 
