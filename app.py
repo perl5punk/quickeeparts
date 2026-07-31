@@ -27,6 +27,8 @@ def create_app(config=None):
     # Initialize Flask-SQLAlchemy with the app
     db.init_app(app)
 
+    # Register the home route
+
     @app.route('/')
     def home():
         """Return the QuickeeParts home page."""
