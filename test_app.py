@@ -59,3 +59,15 @@ def test_no_extra_routes():
     rules = [rule.rule for rule in app.url_map.iter_rules() if rule.rule != '/static/<path:filename>']
     assert '/' in rules
     assert len(rules) == 1
+
+
+
+def test_no_templates_or_blueprints():
+    """Verify the app has no templates, blueprints, or extra routes."""
+    app = create_app()
+    # Check no blueprints registered
+    assert len(app.blueprints) == 0
+    # Check no template files exist outside the app
+    import os
+    assert not os.path.exists("templates")
+
