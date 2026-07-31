@@ -119,7 +119,10 @@ def update_item(item_id):
             # Delete old photo files before saving new ones
             if item.photo_filename:
                 delete_photo_files(item.photo_filename)
-            photo_filename = handle_photo_upload(item.id)
+            photo_filename, upload_error = handle_photo_upload(item.id)
+            if upload_error:
+                db.session.rollback()
+                return jsonify({'error': upload_error}), 400
         item.photo_filename = photo_filename
 
         db.session.commit()
