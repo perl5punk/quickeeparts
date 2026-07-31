@@ -62,6 +62,35 @@ def test_no_extra_routes():
 
 
 
+def test_main_block():
+    """Test that app.py has the standard if __name__ == '__main__' block calling create_app and run."""
+    with open('app.py') as f:
+        source = f.read()
+    assert "__name__" in source and "__main__" in source, (
+        "app.py must contain 'if __name__ == \"__main__\":' entry point block"
+    )
+    assert "create_app()" in source, (
+        "The __main__ block must call create_app()"
+    )
+    assert "app.run(debug=True)" in source, (
+        "The __main__ block must run the dev server with debug=True"
+    )
+
+
+def test_no_external_service_integrations():
+    """Verify the app has no external service integrations (boto, requests, redis, smtplib, etc.)."""
+    with open('app.py') as f:
+        source = f.read()
+    forbidden_imports = ['boto', 'requests', 'redis', 'smtplib', 'celery', 'pika']
+    for mod in forbidden_imports:
+        assert f"import {mod}" not in source, (
+            f"app.py must not import external service module '{mod}'"
+        )
+        assert f"from {mod}" not in source, (
+            f"app.py must not import from external service module '{mod}'"
+        )
+
+
 def test_no_templates_or_blueprints():
     """Verify the app has no templates, blueprints, or extra routes."""
     app = create_app()
