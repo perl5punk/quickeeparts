@@ -403,8 +403,8 @@ class TestUsageExamples:
         """Usage Examples must include concrete, runnable command examples."""
         content = _readme()
         section = _find_section(content, "Usage Examples")
-        # Look for code blocks with python/pytest commands
-        code_blocks = re.findall(r"```(?:bash)?\s*\n(.*?)```", section, re.DOTALL)
+        # Look for fenced code blocks (```bash ... ```)
+        code_blocks = re.findall(r"```(?:\w+)\s*\n(.*?)\n```", section, re.DOTALL)
         command_blocks = [b for b in code_blocks if re.search(r"(python |pytest |pip |cp )", b)]
         assert len(command_blocks) >= 4, (
             f"Usage Examples must include at least 4 runnable command examples (found {len(command_blocks)})"
