@@ -66,3 +66,14 @@ def test_agents_md_has_sandbox_specific_section():
         "Should mention verifying code runs"
     )
     assert "depend" in content.lower(), "Should mention installing dependencies"
+    assert "except" in content.lower(), (
+        "Should mention graceful exception handling"
+    )
+
+
+def test_agents_md_uses_imperative_tone():
+    """Guidelines must be written in imperative tone directed at AI agents ('you' language)."""
+    content = open(AGENTS_PATH).read()
+    assert "you" in content.lower() or "must" in content.lower(), (
+        "Guidelines should use imperative tone directed at agents"
+    )
