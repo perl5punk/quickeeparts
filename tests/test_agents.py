@@ -48,6 +48,12 @@ def test_agents_md_has_making_changes_section():
     assert "consistent" in content.lower() or "consistency" in content.lower(), (
         "Should mention consistency"
     )
+    assert "remove" in content.lower(), (
+        "Should mention not removing existing functionality"
+    )
+    assert "focused" in content.lower() or "minimal" in content.lower(), (
+        "Should mention keeping changes focused and minimal"
+    )
 
 
 def test_agents_md_has_sandbox_specific_section():
