@@ -145,11 +145,11 @@ def test_mime_type_validation_png(app_client, valid_png_bytes):
     assert response.status_code == 302
 
 
-def test_invalid_extension_returns_400(app_client):
+def test_invalid_extension_returns_400(app_client, valid_jpg_bytes):
     """Invalid file extension (non-jpg/jpeg/png) returns a 400 response."""
     # Create a file with .gif extension and valid JPEG content
     data = {
-        "photo": (io.BytesIO(valid_jpg_bytes.__func__(None)), "test.gif"),
+        "photo": (io.BytesIO(valid_jpg_bytes), "test.gif"),
         "name": "Test Part",
         "description": "",
         "category": "",
