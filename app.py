@@ -39,3 +39,4 @@ if __name__ == '__main__':
     # Development server entry point
     app = create_app()
     app.run(debug=True)
+
