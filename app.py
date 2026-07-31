@@ -91,12 +91,10 @@ def add():
             # Validate file extension
             ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
             if ext not in ALLOWED_EXTENSIONS:
-                flash(f'Invalid file type: "{ext}". Allowed types: jpg, jpeg, png')
-                return redirect(url_for('add'))
+                return f'Invalid file type: "{ext}". Allowed types: jpg, jpeg, png', 400
             # Validate MIME type
             if file.mimetype not in ALLOWED_MIME_TYPES:
-                flash(f'Invalid MIME type: "{file.mimetype}". Allowed types: image/jpeg, image/png')
-                return redirect(url_for('add'))
+                return f'Invalid MIME type: "{file.mimetype}". Allowed types: image/jpeg, image/png', 400
             # Save file securely
             safe_name = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], safe_name))
