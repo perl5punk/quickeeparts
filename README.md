@@ -42,7 +42,6 @@ quickeeparts streamlines the entire process of turning unused parts into sold in
 
 ## Project Structure
 
-```
 quickeeparts/
 ├── README.md          # Project documentation
 ├── .gitignore         # Git ignore rules
@@ -51,7 +50,6 @@ quickeeparts/
 ├── Dockerfile.built-sandbox # Docker configuration
 ├── src/               # Application source code
 └── tests/             # Test suite
-```
 
 ---
 
