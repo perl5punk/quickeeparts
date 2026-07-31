@@ -253,11 +253,11 @@ def test_randomized_filename_uuid4(app_client, valid_jpg_bytes):
     ), f"Saved filename should use uuid4 format: {saved_files[0]}"
 
 
-def test_no_path_traversal(app_client):
+def test_no_path_traversal(app_client, valid_jpg_bytes):
     """Path traversal filenames are rejected (secure_filename prevents this)."""
     # Try to upload a file with a path traversal name
     data = {
-        "photo": (io.BytesIO(valid_jpg_bytes.__func__(None)), "../../../etc/passwd.jpg"),
+        "photo": (io.BytesIO(valid_jpg_bytes), "../../../etc/passwd.jpg"),
         "name": "Test Part",
         "description": "",
         "category": "",
