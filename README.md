@@ -42,7 +42,7 @@ quickeeparts streamlines the entire process of turning unused parts into sold in
 
 ## Project Structure
 
-The repository is organized into top-level directories and key files:
+The repository is organized into top-level directories and key files.
 
 ```
 quickeeparts/
@@ -51,7 +51,7 @@ quickeeparts/
 ├── .env.example       # Example environment variables
 ├── requirements.txt   # Python package dependencies
 ├── Dockerfile.built-sandbox # Docker sandbox for development
-├── src/               # Application source code (api/, core/, models/, utils/)
+├── src/               # Application source code
 └── tests/             # Test suite
 ```
 
