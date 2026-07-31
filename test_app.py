@@ -3,10 +3,9 @@ import io
 import os
 import re
 import sqlite3
+import sys
 
 import pytest
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
