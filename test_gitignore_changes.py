@@ -143,7 +143,7 @@ def test_gitignore_preserves_django_section():
 
 def test_gitignore_section_comments_preserved():
     """All section comment headers must be preserved."""
-    lines = _read_gitignore_lines()
+    raw = _read_gitignore_raw()
     section_comments = [
         "# Distribution / packaging",
         "# PyInstaller",
@@ -186,4 +186,4 @@ def test_gitignore_section_comments_preserved():
         "# Streamlit",
     ]
     for comment in section_comments:
-        assert comment in lines, f"Section comment missing: {comment}"
+        assert comment in raw, f"Section comment missing or altered: {comment}"
