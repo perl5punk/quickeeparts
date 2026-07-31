@@ -36,7 +36,7 @@ def create_app(config=None):
 
 
 if __name__ == "__main__":
-    # Development server entry point
+    # Application entry point for development mode
     app = create_app()
     app.run(debug=True)
 
