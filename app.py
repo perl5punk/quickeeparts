@@ -5,9 +5,13 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+# Module-level database initialization so create_all() runs once at import time
+_temp_app = Flask(__name__)
+_temp_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/app.db'
+_temp_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Database tables are created once at module import time
-with _app_ctx:
+with _temp_app.app_context():
+    db.init_app(_temp_app)
     db.create_all()
 
 
@@ -29,13 +33,9 @@ def create_app(config=None):
     # Initialize Flask-SQLAlchemy with the app
     db.init_app(app)
 
-    # Create database tables within app context
-    with app.app_context():
-        db.create_all()
-
     @app.route('/')
     def home():
-        return 'QuickeeParts — The parts utility'
+        return '<html><body><h1>QuickeeParts — The parts utility</h1></body></html>'
 
     return app
 
