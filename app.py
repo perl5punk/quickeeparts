@@ -7,7 +7,7 @@ db = SQLAlchemy()
 
 
 def create_app(config=None):
-    """Application factory that creates and configures the Flask app."""
+    """Application factory that creates and configures the Flask app with database support."""
     app = Flask(__name__)
 
     # Ensure the instance directory exists
