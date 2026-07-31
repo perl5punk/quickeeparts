@@ -31,3 +31,4 @@ def test_db_initialized():
     assert db is not None
     from flask_sqlalchemy import SQLAlchemy
     assert isinstance(db, SQLAlchemy)
+
