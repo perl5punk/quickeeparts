@@ -1,5 +1,0 @@
-#!/usr/local/bin/python
-import sys
-sys.path.insert(0, '/workspace/site-packages')
-from _pytest.config import main
-sys.exit(main())
