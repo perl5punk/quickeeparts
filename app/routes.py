@@ -148,36 +148,37 @@ def delete_item(item_id):
 def handle_photo_upload(item_id):
     """
     Handle photo upload for a junk item.
-    Returns the saved filename or None if no photo uploaded.
+    Returns (photo_filename, error_message) tuple.
+    photo_filename is None if no photo was uploaded or an error occurred.
+    error_message is None on success.
     """
     if 'photo' not in request.files:
-        return None
+        return None, None
 
     file = request.files['photo']
     if file.filename == '':
-        return None
+        return None, None
 
     # Validate file type by extension
     filename_orig = file.filename
     if not allowed_file(filename_orig):
-        raise ValueError(f'Invalid file type. Accepted: {", ".join(ALLOWED_EXTENSIONS)}')
+        return None, 'Invalid file type. Only JPG, PNG, and GIF files are allowed.'
 
-    # Validate file size (Werkzeug MAX_CONTENT_LENGTH handles this at the framework level)
-    # But we also do a manual check
+    # Validate file size
     file.seek(0, 2)  # Seek to end
     file_size = file.tell()
     file.seek(0)  # Seek back to start
 
     if file_size > 20 * 1024 * 1024:  # 20MB
-        raise ValueError('File too large. Maximum size is 20MB.')
+        return None, 'File too large. Maximum size is 20MB.'
 
     # Validate MIME type by reading file content
-    file_start = file.read(4)
-    file.seek(0)
+    file_start = file.read(4096)  # Read more bytes for reliable detection
+    file.seek(0)  # Seek back to start
 
     mime_type = validate_image_mimetype(file_start, filename_orig)
     if mime_type not in ALLOWED_MIME_TYPES:
-        raise ValueError(f'Invalid file type. Only JPG, PNG, and GIF are allowed.')
+        return None, 'Invalid file type. Only JPG, PNG, and GIF files are allowed.'
 
     # Generate unique filename
     ext = filename_orig.rsplit('.', 1)[1].lower()
@@ -196,8 +197,14 @@ def handle_photo_upload(item_id):
     with open(temp_path, 'wb') as f:
         f.write(file_data)
 
-    # Resize and compress the image
-    resize_and_compress(temp_path, ext)
+    try:
+        # Resize and compress the image
+        resize_and_compress(temp_path, ext)
+    except Exception as e:
+        # Clean up temp file on error
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+        return None, f'Failed to process image: {str(e)}'
 
     # Move resized file to final location
     final_path = os.path.join(upload_dir, photo_filename)
@@ -215,9 +222,9 @@ def handle_photo_upload(item_id):
     # Generate thumbnail
     generate_thumbnail(final_path, photo_filename)
 
-    # Clean up temp files - already renamed to final
+    # Clean up temp file - already renamed to final
 
-    return photo_filename
+    return photo_filename, None
 
 
 def validate_image_mimetype(first_bytes, filename):
