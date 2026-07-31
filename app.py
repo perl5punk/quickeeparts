@@ -29,7 +29,7 @@ def create_app(config=None):
 
     @app.route('/')
     def home():
-        """Return the QuickeeParts home page."""
+        """Return the QuickeeParts home page for the parts utility."""
         return '<html><body><h1>QuickeeParts — The parts utility</h1></body></html>'
 
     return app
