@@ -51,3 +51,11 @@ def test_imports_at_top_of_file():
     sqlalchemy_import = any(isinstance(n, ast.ImportFrom) and n.module == 'flask_sqlalchemy' for n in imports)
     assert flask_import, "Flask should be imported at top of app.py"
     assert sqlalchemy_import, "Flask-SQLAlchemy should be imported at top of app.py"
+
+
+def test_no_extra_routes():
+    """Test that only the home route is registered."""
+    app = create_app()
+    rules = [rule.rule for rule in app.url_map.iter_rules() if rule.rule != '/static/<path:filename>']
+    assert '/' in rules
+    assert len(rules) == 1
