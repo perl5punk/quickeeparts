@@ -5,18 +5,12 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-# Module-level database initialization so create_all() runs once at import time
-_temp_app = Flask(__name__)
-_temp_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/app.db'
-_temp_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-with _temp_app.app_context():
-    db.init_app(_temp_app)
-    db.create_all()
-
 
 def create_app(config=None):
     app = Flask(__name__)
+
+    # Ensure the instance directory exists for SQLite
+    os.makedirs(app.instance_path, exist_ok=True)
 
     # Default configuration
     app.config['SECRET_KEY'] = os.urandom(24)
