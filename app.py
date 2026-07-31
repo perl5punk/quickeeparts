@@ -29,8 +29,6 @@ def secure_filename(filename):
     ext = ext.lower()
     return f'{uuid.uuid4()}.{ext}'
 
-DATABASE = os.path.join(app.instance_path, 'junk.db')
-
 
 def get_db():
     """Open a new database connection if there is none yet for the current app context."""
