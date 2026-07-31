@@ -24,7 +24,7 @@ def create_app(config=None):
         else:
             app.config.from_object(config)
 
-    # Initialize Flask-SQLAlchemy with the app
+    # Initialize Flask-SQLAlchemy extension with the app
     db.init_app(app)
 
     @app.route('/')
