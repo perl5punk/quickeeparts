@@ -14,9 +14,9 @@ def create_app(config=None):
     os.makedirs(app.instance_path, exist_ok=True)
 
     # Application configuration defaults
-    app.config['SECRET_KEY'] = os.urandom(24)
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(app.instance_path, "app.db")}'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config["SECRET_KEY"] = os.urandom(24)
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(app.instance_path, "app.db")}"
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Override with provided config
     if config is not None:
@@ -28,14 +28,14 @@ def create_app(config=None):
     # Initialize Flask-SQLAlchemy extension with the app
     db.init_app(app)
 
-    @app.route('/')
+    @app.route("/")
     def home():
         """Return the QuickeeParts home page."""
-        return '<html><body><h1>QuickeeParts — The parts utility</h1></body></html>'
+        return "<html><body><h1>QuickeeParts — The parts utility</h1></body></html>"
 
     return app
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = create_app()
     app.run(debug=True)  # Flask development server
