@@ -9,7 +9,7 @@ db = SQLAlchemy()
 def create_app(config=None):
     app = Flask(__name__)
 
-    # Create the instance directory if it does not exist
+    # Ensure the instance directory exists
     os.makedirs(app.instance_path, exist_ok=True)
 
     # Default application configuration
