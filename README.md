@@ -42,49 +42,17 @@ quickeeparts streamlines the entire process of turning unused parts into sold in
 
 ## Project Structure
 
+The repository is organized into top-level directories and key files:
+
 ```
 quickeeparts/
-├── README.md          # This file
+├── README.md          # Project documentation and usage instructions
 ├── .gitignore         # Git ignore rules
 ├── .env.example       # Example environment variables
-├── requirements.txt   # Python dependencies
-├── Dockerfile.built-sandbox # Docker sandbox configuration
-│
-├── src/
-│   ├── __init__.py
-│   ├── app.py         # Main application entry point
-│   ├── config.py      # Configuration and environment loading
-│   │
-│   ├── api/
-│   │   ├── __init__.py
-│   │   ├── ebay.py    # eBay API integration
-│   │   └── platforms.py # Multi-platform listing logic
-│   │
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── capture.py # Photo capture and upload handling
-│   │   ├── identify.py # AI part identification
-│   │   ├── estimate.py # Demand and value estimation
-│   │   └── queue.py    # Approval queue management
-│   │
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── part.py    # Part data model
-│   │   └── listing.py # Listing data model
-│   │
-│   └── utils/
-│       ├── __init__.py
-│       └── helpers.py # Utility functions
-│
-└── tests/
-    ├── __init__.py
-    ├── test_api.py
-    ├── test_capture.py
-    ├── test_estimate.py
-    ├── test_identify.py
-    ├── test_queue.py
-    ├── test_readme_accuracy.py
-    └── test_readme_criteria.py
+├── requirements.txt   # Python package dependencies
+├── Dockerfile.built-sandbox # Docker sandbox for development
+├── src/               # Application source code (api/, core/, models/, utils/)
+└── tests/             # Test suite
 ```
 
 ---
