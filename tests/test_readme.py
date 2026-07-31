@@ -269,3 +269,32 @@ def test_readme_project_structure_describes_directories():
     assert len(mentioned_dirs) >= 2, (
         f"Project Structure should describe main directories, found: {mentioned_dirs}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Criterion 7: Contributing section
+# ---------------------------------------------------------------------------
+
+def test_readme_has_contributing_section():
+    """README contains a Contributing section."""
+    content = _readme().lower()
+    assert "contributing" in content, "README missing 'Contributing' section"
+
+
+def test_readme_contributing_fork_branch_pr():
+    """Contributing mentions fork, branch, and pull request."""
+    content = _readme().lower()
+    assert "fork" in content, "Contributing should mention forking"
+    assert "branch" in content, "Contributing should mention branches"
+    assert "pull request" in content or "pull-request" in content, (
+        "Contributing should mention pull requests"
+    )
+
+
+def test_readme_contributing_coding_standards():
+    """Contributing mentions coding standards and tests."""
+    content = _readme().lower()
+    assert any(w in content for w in ["pep 8", "coding standard", "docstring"]), (
+        "Contributing should mention coding standards"
+    )
+    assert "test" in content, "Contributing should mention tests"
