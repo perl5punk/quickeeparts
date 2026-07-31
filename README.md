@@ -48,7 +48,7 @@ quickeeparts/
 ├── .gitignore         # Git ignore rules
 ├── .env.example       # Example environment variables
 ├── requirements.txt   # Python dependencies
-├── setup.py           # Package setup script
+├── Dockerfile.built-sandbox # Docker sandbox configuration
 │
 ├── src/
 │   ├── __init__.py
@@ -76,16 +76,15 @@ quickeeparts/
 │       ├── __init__.py
 │       └── helpers.py # Utility functions
 │
-├── tests/
-│   ├── __init__.py
-│   ├── test_capture.py
-│   ├── test_identify.py
-│   ├── test_estimate.py
-│   ├── test_queue.py
-│   └── test_api.py
-│
-└── docs/
-    └── config.md       # Configuration reference
+└── tests/
+    ├── __init__.py
+    ├── test_api.py
+    ├── test_capture.py
+    ├── test_estimate.py
+    ├── test_identify.py
+    ├── test_queue.py
+    ├── test_readme_accuracy.py
+    └── test_readme_criteria.py
 ```
 
 ---
