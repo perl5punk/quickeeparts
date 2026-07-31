@@ -212,3 +212,138 @@ class TestAppConfig:
         assert "'127.0.0.1'" in source or '"127.0.0.1"' in source
         assert '5000' in source
         assert 'debug=False' in source
+
+    def test_requirements_txt_exactly_flask(self):
+        """requirements.txt should contain only 'flask' (no versions or extras)."""
+        path = os.path.join(ROOT, 'requirements.txt')
+        content = open(path).read().strip()
+        assert content == 'flask', f"Expected 'flask' but got: {content}"
+
+
+class TestInstanceDirectory:
+    """Test that the instance/ directory and junk.db exist."""
+
+    def test_instance_directory_exists(self):
+        """The instance/ directory must exist at the project root."""
+        path = os.path.join(ROOT, 'instance')
+        assert os.path.isdir(path), "instance/ directory not found at project root"
+
+    def test_junk_db_exists_in_instance(self):
+        """The junk.db SQLite file must exist inside instance/."""
+        path = os.path.join(ROOT, 'instance', 'junk.db')
+        assert os.path.isfile(path), "instance/junk.db not found"
+
+    def test_db_path_is_relative_to_instance(self):
+        """DATABASE must be configured relative to app.instance_path."""
+        from app import app, DATABASE
+        expected = os.path.join(app.instance_path, 'junk.db')
+        assert DATABASE == expected, f"DATABASE path {DATABASE} is not relative to instance_path {expected}"
+
+
+class TestPostRedirectGet:
+    """Test POST-Redirect-GET pattern on /add."""
+
+    def test_add_post_returns_302_redirect(self, app_client):
+        """POST to /add should return a 302 redirect (not 200)."""
+        response = app_client.post('/add', data={
+            'name': 'Redirect Test',
+            'description': 'Testing redirect',
+            'category': 'Test'
+        }, follow_redirects=False)
+        assert response.status_code == 302, f"Expected 302 redirect, got {response.status_code}"
+
+    def test_add_post_redirect_location(self, app_client):
+        """POST to /add should redirect to /add."""
+        response = app_client.post('/add', data={
+            'name': 'Redirect Location Test',
+            'description': 'test',
+            'category': 'Test'
+        }, follow_redirects=False)
+        assert response.status_code == 302
+        assert '/add' in response.location, f"Redirect location should be /add, got {response.location}"
+
+
+class TestDatabaseSchema:
+    """Test database schema constraints and defaults."""
+
+    def test_name_column_is_not_null(self, app_client):
+        """The name column must have a NOT NULL constraint."""
+        import app as app_module
+        db = sqlite3.connect(app_module.DATABASE)
+        cursor = db.execute("PRAGMA table_info(junk)")
+        columns = {row[1]: row for row in cursor.fetchall()}
+        db.close()
+        name_column = columns.get('name')
+        assert name_column is not None, "name column not found"
+        # Column not-null flag is in index 3 (0=nullable, 1=NOT NULL)
+        assert name_column[3] == 1, "name column should have NOT NULL constraint"
+
+    def test_date_added_has_default_current_timestamp(self, app_client):
+        """The date_added column should have DEFAULT CURRENT_TIMESTAMP."""
+        import app as app_module
+        db = sqlite3.connect(app_module.DATABASE)
+        cursor = db.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='junk'")
+        schema_sql = cursor.fetchone()[0]
+        db.close()
+        assert 'DEFAULT CURRENT_TIMESTAMP' in schema_sql, (
+            f"date_added should have DEFAULT CURRENT_TIMESTAMP. "
+            f"Schema: {schema_sql}"
+        )
+
+
+class TestNoExternalFrameworks:
+    """Test that no external CSS/JS frameworks are used."""
+
+    def test_no_bootstrap_in_templates(self):
+        """No Bootstrap framework CSS/JS should be present."""
+        for tmpl in ['index.html', 'add.html', 'list.html']:
+            path = os.path.join(ROOT, 'templates', tmpl)
+            content = open(path).read().lower()
+            assert 'bootstrap' not in content, (
+                f"Bootstrap framework found in {tmpl}"
+            )
+
+    def test_no_jquery_in_templates(self):
+        """No jQuery library should be present."""
+        for tmpl in ['index.html', 'add.html', 'list.html']:
+            path = os.path.join(ROOT, 'templates', tmpl)
+            content = open(path).read().lower()
+            assert 'jquery' not in content, (
+                f"jQuery library found in {tmpl}"
+            )
+
+
+class TestDBConnectionPattern:
+    """Test that database connections follow the per-request pattern."""
+
+    def test_get_db_uses_g_object(self):
+        """get_db should use Flask's g object for connection storage."""
+        import app as app_module
+        source = open(os.path.join(ROOT, 'app.py')).read()
+        assert "if 'db' not in g" in source, "get_db should check g for existing db connection"
+        assert "g.db = sqlite3.connect" in source, "get_db should store connection in g.db"
+
+    def test_close_db_pops_g(self):
+        """close_db should pop the db from g to close the connection."""
+        import app as app_module
+        source = open(os.path.join(ROOT, 'app.py')).read()
+        assert "g.pop('db', None)" in source or "g.pop(\"db\", None)" in source, (
+            "close_db should pop db from g"
+        )
+
+
+class TestListTemplateDisplay:
+    """Test that list.html displays all required fields."""
+
+    def test_list_shows_all_fields(self, client_with_item):
+        """list.html should display name, description, category, and date_added."""
+        response = client_with_item.get('/list')
+        assert response.status_code == 200
+        data = response.data.decode('utf-8')
+        assert 'Old Bolt' in data, "Name should be displayed"
+        assert 'A rusty bolt' in data, "Description should be displayed"
+        assert 'Hardware' in data, "Category should be displayed"
+        # date_added should contain a date/time string
+        assert '20' in data and '-' in data, (
+            "date_added should be displayed"
+        )
