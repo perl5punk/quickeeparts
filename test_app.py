@@ -32,3 +32,11 @@ def test_db_initialized():
     from flask_sqlalchemy import SQLAlchemy
     assert isinstance(db, SQLAlchemy)
 
+
+def test_create_app_with_config_class():
+    """Test that create_app properly loads config from a class."""
+    class Config:
+        SECRET_KEY = 'class-based-secret'
+    app = create_app(Config)
+    assert app.config['SECRET_KEY'] == 'class-based-secret'
+
