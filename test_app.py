@@ -27,10 +27,14 @@ def test_create_app_with_config_dict():
 
 
 def test_db_initialized():
-    """Test that the db object is properly initialized as a SQLAlchemy instance."""
-    assert db is not None
+    """Test that db.init_app(app) is called inside create_app, registering Flask-SQLAlchemy."""
     from flask_sqlalchemy import SQLAlchemy
     assert isinstance(db, SQLAlchemy)
+    app = create_app()
+    # Verify Flask-SQLAlchemy is registered via init_app
+    assert 'sqlalchemy' in app.extensions, (
+        "db.init_app(app) must be called inside create_app()"
+    )
 
 
 def test_create_app_with_config_class():
