@@ -29,3 +29,5 @@ def test_create_app_with_config_dict():
 def test_db_initialized():
     """Test that the db object is properly initialized as a SQLAlchemy instance."""
     assert db is not None
+    from flask_sqlalchemy import SQLAlchemy
+    assert isinstance(db, SQLAlchemy)
