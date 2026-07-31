@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Junk — QuickeeParts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 80px;
+        }
+        button {
+            margin-top: 15px;
+            padding: 8px 20px;
+            cursor: pointer;
+        }
+        nav a {
+            margin-right: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Add Junk Item</h1>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/list">View All Junk</a>
+    </nav>
+    <form method="POST" action="/add">
+        <label for="name">Name (required)</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="description">Description</label>
+        <textarea id="description" name="description"></textarea>
+
+        <label for="category">Category</label>
+        <input type="text" id="category" name="category">
+
+        <button type="submit">Add Junk</button>
+    </form>
+</body>
+</html>
