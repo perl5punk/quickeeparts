@@ -2,6 +2,7 @@ import os
 import sqlite3
 import uuid
 from flask import Flask, render_template, request, redirect, url_for, g
+from werkzeug.exceptions import RequestEntityTooLarge
 
 app = Flask(__name__)
 
