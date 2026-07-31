@@ -1,5 +1,4 @@
 import os
-import sys
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -32,11 +31,11 @@ def create_app(config=None):
     @app.route("/")
     def home():
         """Return the QuickeeParts home page."""
-        return "<html><body><h1>QuickeeParts — The parts utility</h1></body></html>"
+        return "<html><body><h1>QuickeeParts \u2014 The parts utility</h1></body></html>"
 
     return app
 
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True)  # Flask development server with debug mode
+    app.run(debug=True)  # Flask development server
