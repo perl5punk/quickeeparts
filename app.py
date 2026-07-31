@@ -24,7 +24,7 @@ def create_app(config=None):
         else:
             app.config.from_object(config)
 
-    # Initialize Flask-SQLAlchemy with the app  # DB initialization via Flask-SQLAlchemy
+    # Initialize Flask-SQLAlchemy with the app  # Database initialization
     db.init_app(app)
 
     # Register the home route
