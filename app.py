@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy  # Flask-SQLAlchemy for database support
 
 db = SQLAlchemy()
 
