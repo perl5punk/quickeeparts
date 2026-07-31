@@ -221,20 +221,18 @@ def handle_photo_upload(item_id):
 
 
 def validate_image_mimetype(first_bytes, filename):
-    """Validate image MIME type from file content and extension."""
-    # Try to detect MIME type from content
-    try:
-        img = Image.open(file_like_wrapper(first_bytes + b'x' * 10000))
-        ext = img.format
-        if ext:
-            if ext == 'JPEG':
-                return 'image/jpeg'
-            elif ext == 'PNG':
-                return 'image/png'
-            elif ext == 'GIF':
-                return 'image/gif'
-    except Exception:
-        pass
+    """Validate image MIME type from file content magic bytes and extension."""
+    # Detect MIME type from magic bytes (first 12 bytes are sufficient)
+    if len(first_bytes) >= 3:
+        # PNG: 89 50 4E 47
+        if first_bytes[:4] == b'\x89PNG':
+            return 'image/png'
+        # GIF: 47 49 46 38
+        if first_bytes[:4] == b'GIF8':
+            return 'image/gif'
+        # JPEG: FF D8 FF
+        if first_bytes[:3] == b'\xFF\xD8\xFF':
+            return 'image/jpeg'
 
     # Fall back to extension check
     ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
