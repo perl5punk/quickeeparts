@@ -39,4 +39,3 @@ def test_create_app_with_config_class():
         SECRET_KEY = 'class-based-secret'
     app = create_app(Config)
     assert app.config['SECRET_KEY'] == 'class-based-secret'
-
