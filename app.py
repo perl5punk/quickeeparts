@@ -39,7 +39,6 @@ def init_db():
             date_added DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-    db.commit()
 
 
 # Initialize the database at app startup
