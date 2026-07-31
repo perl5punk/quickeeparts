@@ -39,3 +39,15 @@ def test_create_app_with_config_class():
         SECRET_KEY = 'class-based-secret'
     app = create_app(Config)
     assert app.config['SECRET_KEY'] == 'class-based-secret'
+
+
+def test_imports_at_top_of_file():
+    """Test that Flask and Flask-SQLAlchemy are imported at the top."""
+    import ast
+    with open('app.py') as f:
+        tree = ast.parse(f.read())
+    imports = [node for node in ast.walk(tree) if isinstance(node, (ast.Import, ast.ImportFrom))]
+    flask_import = any(isinstance(n, ast.ImportFrom) and n.module == 'flask' for n in imports)
+    sqlalchemy_import = any(isinstance(n, ast.ImportFrom) and n.module == 'flask_sqlalchemy' for n in imports)
+    assert flask_import, "Flask should be imported at top of app.py"
+    assert sqlalchemy_import, "Flask-SQLAlchemy should be imported at top of app.py"
