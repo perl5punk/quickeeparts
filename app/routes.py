@@ -65,7 +65,10 @@ def create_item():
         db.session.flush()  # Get item.id
 
         # Handle photo upload
-        photo_filename = handle_photo_upload(item.id)
+        photo_filename, upload_error = handle_photo_upload(item.id)
+        if upload_error:
+            db.session.rollback()
+            return jsonify({'error': upload_error}), 400
         item.photo_filename = photo_filename
 
         db.session.commit()
