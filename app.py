@@ -84,9 +84,27 @@ def add():
         description = request.form.get('description', '')
         category = request.form.get('category', '')
         db = get_db()
+        photo_path = None
+
+        file = request.files.get('photo')
+        if file and file.filename != '':
+            # Validate file extension
+            ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+            if ext not in ALLOWED_EXTENSIONS:
+                flash(f'Invalid file type: "{ext}". Allowed types: jpg, jpeg, png')
+                return redirect(url_for('add'))
+            # Validate MIME type
+            if file.mimetype not in ALLOWED_MIME_TYPES:
+                flash(f'Invalid MIME type: "{file.mimetype}". Allowed types: image/jpeg, image/png')
+                return redirect(url_for('add'))
+            # Save file securely
+            safe_name = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], safe_name))
+            photo_path = f'photos/{safe_name}'
+
         db.execute(
-            'INSERT INTO junk (name, description, category) VALUES (?, ?, ?)',
-            (name, description, category)
+            'INSERT INTO junk (name, description, category, photo_path) VALUES (?, ?, ?, ?)',
+            (name, description, category, photo_path)
         )
         db.commit()
         return redirect(url_for('add'))
