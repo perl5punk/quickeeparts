@@ -38,4 +38,4 @@ def create_app(config=None):
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True)  # Start the Flask development server in debug mode for local development
+    app.run(debug=True)  # Start the Flask development server for local development with debug
