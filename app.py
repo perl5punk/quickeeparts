@@ -15,7 +15,7 @@ def create_app(config=None):
 
     # Application configuration defaults
     app.config["SECRET_KEY"] = os.urandom(24)
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(app.instance_path, "app.db")}"
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(app.instance_path, 'app.db')}"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Override with provided config
