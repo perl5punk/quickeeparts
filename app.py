@@ -1,15 +1,22 @@
+import os
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
 
+# Database tables are created once at module import time
+with _app_ctx:
+    db.create_all()
+
+
 def create_app(config=None):
     app = Flask(__name__)
 
     # Default configuration
-    app.config['SECRET_KEY'] = 'fallback-secret-key-change-in-production'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/app.db'
+    app.config['SECRET_KEY'] = os.urandom(24)
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(app.instance_path, "app.db")}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Override with provided config
