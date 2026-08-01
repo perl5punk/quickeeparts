@@ -30,6 +30,16 @@
 - Push changes to main after verification
 - Don't leave work on feature branches without merging to main
 
+## Gitignore Safety
+
+- Many repositories have `.gitignore` entries that look harmless but silently discard application data.
+- **This repo's specific risks:**
+  - `parts/` — could discard uploaded part photos
+  - `var/` — could discard database, backups, or other application data
+- **Always verify what paths the application actually writes to** before adding or modifying `.gitignore` entries, and confirm those paths are truly meant to be ignored (e.g. build artifacts or caches) and not application data.
+- Use `git status` and `find . -name <path>` to audit what would be lost before adding `.gitignore` entries.
+- **Never blindly follow or copy `.gitignore` patterns from other projects.**
+
 ## File Organization
 
 - Follow existing project structure (app.py at root, templates/, src/, tests/)
