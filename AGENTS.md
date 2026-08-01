@@ -39,7 +39,7 @@
 - **Always verify what paths the application actually writes to** before adding or modifying `.gitignore` entries, and confirm those paths are truly meant to be ignored (e.g. build artifacts or caches) and not application data.
 - Use `git status` and `find . -name <path>` to audit what would be lost before adding `.gitignore` entries.
 - **Never blindly follow or copy `.gitignore` patterns from other projects.**
-- When in doubt, consult `git status` to see which files are untracked and would be lost.
+- When auditing, also run `find . -name '*.db' -o -name '*.sqlite' -o -name '*.bak'` to catch hidden data files that might be unintentionally ignored.
 
 ## File Organization
 
