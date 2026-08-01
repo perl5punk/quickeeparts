@@ -1,13 +1,34 @@
 import os
 import sqlite3
+import uuid
 from flask import Flask, render_template, request, redirect, url_for, g
+from werkzeug.exceptions import RequestEntityTooLarge
 
 app = Flask(__name__)
 
-# Ensure instance directory exists
+# Configuration
+app.config['SECRET_KEY'] = 'dev-key'
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5 MB
+UPLOAD_FOLDER = os.path.join(app.instance_path, 'photos')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Ensure instance and upload directories exist
 os.makedirs(app.instance_path, exist_ok=True)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 DATABASE = os.path.join(app.instance_path, 'junk.db')
+
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
+ALLOWED_MIME_TYPES = {'image/jpeg', 'image/png'}
+
+
+def secure_filename(filename):
+    """Generate a safe filename to prevent path traversal attacks."""
+    if '..' in filename or '/' in filename or '\\' in filename:
+        filename = os.path.basename(filename)
+    ext = filename.rsplit('.', 1)[1] if '.' in filename else ''
+    ext = ext.lower()
+    return f'{uuid.uuid4()}.{ext}'
 
 
 def get_db():
@@ -27,7 +48,7 @@ def close_db(exception):
 
 
 def init_db():
-    """Create the junk table if it does not exist."""
+    """Create the junk table if it does not exist, and migrate for photo_path."""
     db = get_db()
     db.execute('''
         CREATE TABLE IF NOT EXISTS junk (
@@ -38,12 +59,22 @@ def init_db():
             date_added DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    # Migrate: add photo_path column if it does not exist
+    columns = [row[1] for row in db.execute('PRAGMA table_info(junk)').fetchall()]
+    if 'photo_path' not in columns:
+        db.execute('ALTER TABLE junk ADD COLUMN photo_path TEXT')
     db.commit()
 
 
 # Initialize the database at app startup
 with app.app_context():
     init_db()
+
+
+@app.errorhandler(RequestEntityTooLarge)
+def too_large(error):
+    """Handle file size exceeding the limit."""
+    return 'File too large. Maximum size is 5 MB (5242880 bytes).', 400
 
 
 @app.route('/')
@@ -60,9 +91,25 @@ def add():
         description = request.form.get('description', '')
         category = request.form.get('category', '')
         db = get_db()
+        photo_path = None
+
+        file = request.files.get('photo')
+        if file and file.filename != '':
+            # Validate file extension
+            ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+            if ext not in ALLOWED_EXTENSIONS:
+                return f'Invalid file type: "{ext}". Allowed types: jpg, jpeg, png', 400
+            # Validate MIME type
+            if file.mimetype not in ALLOWED_MIME_TYPES:
+                return f'Invalid MIME type: "{file.mimetype}". Allowed types: image/jpeg, image/png', 400
+            # Save file securely
+            safe_name = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], safe_name))
+            photo_path = f'photos/{safe_name}'
+
         db.execute(
-            'INSERT INTO junk (name, description, category) VALUES (?, ?, ?)',
-            (name, description, category)
+            'INSERT INTO junk (name, description, category, photo_path) VALUES (?, ?, ?, ?)',
+            (name, description, category, photo_path)
         )
         db.commit()
         return redirect(url_for('add'))
