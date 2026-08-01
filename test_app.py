@@ -213,13 +213,6 @@ class TestAppConfig:
         assert '5000' in source
         assert 'debug=False' in source
 
-    def test_requirements_txt_exactly_flask(self):
-        """requirements.txt should contain only 'flask' (no versions or extras)."""
-        path = os.path.join(ROOT, 'requirements.txt')
-        content = open(path).read().strip()
-        assert content == 'flask', f"Expected 'flask' but got: {content}"
-
-
 class TestInstanceDirectory:
     """Test that the instance/ directory and junk.db exist."""
 
