@@ -40,6 +40,7 @@
 - Use `git status` and `find . -name <path>` to audit what would be lost before adding `.gitignore` entries.
 - **Never blindly follow or copy `.gitignore` patterns from other projects.**
 - When auditing, also run `find . -name '*.db' -o -name '*.sqlite' -o -name '*.bak'` to catch hidden data files that might be unintentionally ignored.
+- Remember: a `.gitignore` entry removes files from version control, which can cause permanent data loss if not backed up.
 
 ## File Organization
 
