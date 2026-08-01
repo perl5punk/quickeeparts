@@ -32,7 +32,7 @@
 
 ## Gitignore Safety
 
-- Many repositories have `.gitignore` entries that look harmless but silently discard application data.
+- Many repositories have `.gitignore` entries that look harmless but silently discard application data. **Always audit before you ignore.**
 - **This repo's specific risks:**
   - `parts/` — could discard uploaded part photos
   - `var/` — could discard database, backups, or other application data
