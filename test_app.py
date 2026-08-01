@@ -757,3 +757,71 @@ def test_add_html_file_input(app_client):
     html = response.data.decode("utf-8")
     assert 'type="file"' in html or "type='file'" in html, "add.html must have a file input"
     assert "name=\"photo\"" in html or 'name=\'photo\'' in html, "File input must have name='photo'"
+
+
+# ─── Additional coverage for MIME type validation with valid extension ───
+
+def test_mime_type_rejected_with_valid_extension():
+    """Valid extension (jpg) but invalid MIME type (application/octet-stream) returns 400.
+    This exercises the MIME check code path (line 103) which extension-only tests never reach."""
+    from app import app
+
+    boundary = "----MimeBoundaryCheck"
+    body = (
+        f"------{boundary}\r\n"
+        f'Content-Disposition: form-data; name="photo"; filename="test.jpg"\r\n'
+        f"Content-Type: application/octet-stream\r\n"
+        f"\r\n"
+        f"fake image data\r\n"
+        f"------{boundary}\r\n"
+        f'Content-Disposition: form-data; name="name"\r\n\r\n'
+        f"Test Part\r\n"
+        f"------{boundary}\r\n"
+        f'Content-Disposition: form-data; name="description"\r\n\r\n'
+        f"\r\n"
+        f"------{boundary}\r\n"
+        f'Content-Disposition: form-data; name="category"\r\n\r\n'
+        f"Test\r\n"
+        f"------{boundary}--\r\n"
+    ).encode()
+
+    with app.test_client() as c:
+        resp = c.post(
+            "/add",
+            data=body,
+            content_type=f"multipart/form-data; boundary=----{boundary}",
+            follow_redirects=False,
+        )
+    assert resp.status_code == 400
+    body_text = resp.data.decode("utf-8", errors="replace")
+    assert (
+        "Invalid MIME type" in body_text or "image/jpeg" in body_text or "image/png" in body_text
+    ), f"MIME error should mention image types. Got: {body_text}"
+
+
+def test_photo_path_stored_with_all_fields(app_client):
+    """On successful upload, photo_path is stored alongside name, description, and category."""
+    import sqlite3
+
+    import app as app_module
+
+    jpeg = _minimal_jpeg()
+    data = {
+        "photo": (io.BytesIO(jpeg), "test.jpg"),
+        "name": "Specific Name",
+        "description": "Specific Description",
+        "category": "Specific Category",
+    }
+    app_client.post(
+        "/add", data=data, content_type="multipart/form-data", follow_redirects=False
+    )
+    db = sqlite3.connect(app_module.DATABASE)
+    row = db.execute(
+        "SELECT name, description, category, photo_path FROM junk ORDER BY id DESC LIMIT 1"
+    ).fetchone()
+    db.close()
+    assert row[0] == "Specific Name", f"Name mismatch: {row[0]}"
+    assert row[1] == "Specific Description", f"Description mismatch: {row[1]}"
+    assert row[2] == "Specific Category", f"Category mismatch: {row[2]}"
+    assert row[3] is not None, "photo_path should be set"
+    assert row[3].startswith("photos/")
