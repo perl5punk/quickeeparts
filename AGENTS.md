@@ -38,7 +38,20 @@ When modifying existing code, exercise restraint and consistency.
 - **Don't remove existing functionality without clear reason.** Every existing feature or behavior was added for a reason. If you need to replace something, provide a documented justification and a tested alternative.
 - **Keep changes focused and minimal.** Make one logical change per commit. Avoid refactoring unrelated code, changing formatting across large files, or bundling multiple features into a single commit. This makes diffs easier to review and roll back if necessary.
 
----
+## Gitignore Safety
+
+- Many repositories have `.gitignore` entries that look harmless but silently discard application data. **Always audit before you ignore.**
+- **This repo's specific risks:**
+  - `parts/` — could discard uploaded part photos
+  - `var/` — could discard database, backups, or other application data
+- **Always verify what paths the application actually writes to** before adding or modifying `.gitignore` entries, and confirm those paths are truly meant to be ignored (e.g. build artifacts or caches) and not application data.
+- Use `git status` and `find . -name <path>` to audit what would be lost before adding `.gitignore` entries.
+- **Never blindly follow or copy `.gitignore` patterns from other projects.**
+- When auditing, also run `find . -name '*.db' -o -name '*.sqlite' -o -name '*.bak'` to catch hidden data files that might be unintentionally ignored.
+- Remember: a `.gitignore` entry removes files from version control, which can cause permanent data loss if not backed up.
+- Back up critical data before modifying `.gitignore` to avoid accidental deletion of tracked application data.
+
+## File Organization
 
 ## Sandbox-Specific Behavior
 
