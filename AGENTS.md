@@ -41,6 +41,7 @@
 - **Never blindly follow or copy `.gitignore` patterns from other projects.**
 - When auditing, also run `find . -name '*.db' -o -name '*.sqlite' -o -name '*.bak'` to catch hidden data files that might be unintentionally ignored.
 - Remember: a `.gitignore` entry removes files from version control, which can cause permanent data loss if not backed up.
+- Back up critical data before modifying `.gitignore` to avoid accidental deletion of tracked application data.
 
 ## File Organization
 
