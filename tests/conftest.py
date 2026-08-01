@@ -8,24 +8,29 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest
 
-from app import app as flask_app, init_db
-
 
 @pytest.fixture
-def app():
-    """Create application for testing."""
-    flask_app.config['TESTING'] = True
-    flask_app.config['DATABASE'] = tempfile.NamedTemporaryFile(delete=False).name
+def client():
+    """Create a test client with an isolated database for each test."""
+    import app as app_module
+    # Use a temporary database file for isolation
+    db_fd, db_path = tempfile.mkstemp(suffix='.db')
+    os.close(db_fd)
 
-    with flask_app.app_context():
-        init_db()
+    # Override the app's database path
+    old_db = app_module.DATABASE
+    app_module.DATABASE = db_path
 
-    yield flask_app
+    # Re-initialize the database
+    with app_module.app.app_context():
+        app_module.init_db()
 
-    os.unlink(flask_app.config['DATABASE'])
+    app_module.app.config['TESTING'] = True
 
+    client = app_module.app.test_client()
 
-@pytest.fixture
-def client(app):
-    """A test client for the app."""
-    return app.test_client()
+    yield client
+
+    # Restore original database path and clean up
+    app_module.DATABASE = old_db
+    os.unlink(db_path)
