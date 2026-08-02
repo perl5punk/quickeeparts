@@ -170,6 +170,15 @@ def update_item(item_id):
     return render_template('edit_item.html', item=item)
 
 
+@items.route('/items/<int:item_id>/edit', methods=['GET'])
+def edit_item(item_id):
+    """Show the edit form for a junk item."""
+    item = db.session.get(JunkItem, item_id)
+    if item is None:
+        return jsonify({'error': 'Item not found'}), 404
+    return render_template('edit_item.html', item=item)
+
+
 @items.route('/items/<int:item_id>', methods=['DELETE'])
 def delete_item(item_id):
     """Delete a junk item and its associated photo files."""
