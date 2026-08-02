@@ -599,8 +599,15 @@ def test_edit_item_photo_replacement_old_thumb_gone():
     """When editing with a new photo, the old thumbnail is also deleted."""
     from app import app
     import os
-    import time
     with app.test_client() as c:
+        # Create a second item first so this item gets a different ID
+        jpeg_bg = _minimal_jpeg()
+        r_bg = c.post('/items', data={
+            'photo': (io.BytesIO(jpeg_bg), 'bg.jpg'),
+            'name': 'Background Item',
+        }, content_type='multipart/form-data')
+        assert r_bg.status_code == 201
+
         jpeg1 = _minimal_jpeg()
         r1 = c.post('/items', data={
             'photo': (io.BytesIO(jpeg1), 'thumb_old.jpg'),
@@ -619,9 +626,6 @@ def test_edit_item_photo_replacement_old_thumb_gone():
         )
         assert os.path.exists(old_thumb_path)
 
-        # Small delay to ensure the new upload gets a different timestamp/filename
-        time.sleep(0.05)
-
         jpeg2 = _minimal_png()
         r2 = c.put(f'/items/{item_id}', data={
             'name': 'Thumb Edit',
@@ -635,8 +639,8 @@ def test_edit_item_photo_replacement_old_thumb_gone():
             upload_dir, 'thumbnails',
             f'{new_photo.rsplit(".", 1)[0]}_thumb.jpg'
         )
-        # Old and new photos have different filenames now (due to time.sleep),
-        # so we can verify the old thumbnail was deleted and the new one exists
+        # Different item IDs ensure old_photo != new_photo filenames,
+        # so we can independently verify old was deleted and new exists
         assert not os.path.exists(old_thumb_path), "Old thumbnail should be deleted"
         assert os.path.exists(new_thumb_path), "New thumbnail should exist"
 
