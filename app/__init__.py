@@ -44,6 +44,22 @@ def _init_legacy_db():
         if 'photo_path' not in columns:
             conn.execute('ALTER TABLE junk ADD COLUMN photo_path TEXT')
         conn.commit()
+
+        # Also create the junk_item table for SQLAlchemy usage
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS junk_item (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                description TEXT,
+                category TEXT,
+                status TEXT DEFAULT 'pending',
+                condition TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                photo_filename TEXT
+            )
+        ''')
+        conn.commit()
     finally:
         conn.close()
 
