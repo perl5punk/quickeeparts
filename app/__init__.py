@@ -1,4 +1,5 @@
 from flask import Flask
+from app.models import db
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dev-secret-key'
