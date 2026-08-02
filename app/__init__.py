@@ -1,11 +1,18 @@
 from flask import Flask, render_template, redirect, url_for, g, request
 from app.models import db
+from werkzeug.exceptions import RequestEntityTooLarge
 import os
 import uuid
 
 app = Flask(__name__, template_folder='../templates')
 app.config['SECRET_KEY'] = 'dev-secret-key'
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB for legacy route compatibility
+
+
+@app.errorhandler(RequestEntityTooLarge)
+def too_large(error):
+    """Handle file size exceeding the limit."""
+    return 'File too large. Maximum size is 5 MB (5242880 bytes).', 400
 
 # Backward-compatible config for legacy app.py tests
 UPLOAD_FOLDER = os.path.join(app.instance_path, 'photos')
