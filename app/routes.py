@@ -12,8 +12,6 @@ from werkzeug.utils import secure_filename
 
 from app import db
 from app.junk_item import JunkItem
-from app.models import db
-from app.models import db
 
 items = Blueprint('items', __name__)
 
