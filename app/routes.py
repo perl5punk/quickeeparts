@@ -271,7 +271,7 @@ def handle_photo_upload(item_id):
 def validate_image_mimetype(first_bytes, filename):
     """Validate image MIME type from file content magic bytes and extension."""
     # Detect MIME type from magic bytes (first 12 bytes are sufficient)
-    if len(first_bytes) >= 3:
+    if len(first_bytes) >= 4:
         # PNG: 89 50 4E 47
         if first_bytes[:4] == b'\x89PNG':
             return 'image/png'
@@ -282,14 +282,9 @@ def validate_image_mimetype(first_bytes, filename):
         if first_bytes[:3] == b'\xFF\xD8\xFF':
             return 'image/jpeg'
 
-    # Fall back to extension check
-    ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
-    ext_map = {
-        'jpg': 'image/jpeg', 'jpeg': 'image/jpeg',
-        'png': 'image/png',
-        'gif': 'image/gif'
-    }
-    return ext_map.get(ext, '')
+    # No magic bytes matched — reject non-image content
+    # (extension alone is not trusted; must have valid file header)
+    return ''
 
 
 def file_like_wrapper(data):
