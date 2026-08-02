@@ -125,15 +125,19 @@ def edit_item(item_id):
     return render_template('edit_item.html', item=item)
 
 
-@items.route('/items/<int:item_id>', methods=['PUT', 'DELETE'])
+@items.route('/items/<int:item_id>', methods=['PUT', 'DELETE', 'POST'])
 def update_item(item_id):
-    """Update or delete a junk item."""
+    """Update or delete a junk item.
+
+    Accepts PUT for updates and DELETE or POST (with _method=DELETE) for deletions.
+    POST with _method=DELETE is for browser compatibility since browsers only support GET/POST.
+    """
     item = db.session.get(JunkItem, item_id)
     if item is None:
         return jsonify({'error': 'Item not found'}), 404
 
-    # Handle DELETE
-    if request.method == 'DELETE':
+    # Handle DELETE (via DELETE method or POST with _method=DELETE)
+    if request.method == 'DELETE' or (request.method == 'POST' and request.form.get('_method') == 'DELETE'):
         # Delete photo files from disk
         if item.photo_filename:
             delete_photo_files(item.photo_filename)
