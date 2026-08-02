@@ -26,9 +26,43 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@items.route('/items')
-def list_items():
-    """List all junk items with thumbnails."""
+@items.route('/items', methods=['GET', 'POST'])
+def items_route():
+    """List all junk items (GET) or create a new one (POST)."""
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        description = request.form.get('description', '').strip()
+        category = request.form.get('category', '').strip()
+        status = request.form.get('status', 'pending')
+        condition = request.form.get('condition', '').strip()
+
+        if not name:
+            return jsonify({'error': 'Item name is required'}), 400
+
+        item = JunkItem(
+            name=name,
+            description=description,
+            category=category,
+            status=status,
+            condition=condition,
+        )
+        db.session.add(item)
+        db.session.flush()  # Get item.id
+
+        # Handle photo upload
+        photo_filename, upload_error = handle_photo_upload(item.id)
+        if upload_error:
+            db.session.rollback()
+            return jsonify({'error': upload_error}), 400
+        item.photo_filename = photo_filename
+
+        db.session.commit()
+        return jsonify({
+            'message': 'Item created successfully',
+            'item_id': item.id,
+            'photo_filename': photo_filename
+        }), 201
+
     items_list = JunkItem.query.order_by(JunkItem.created_at.desc()).all()
     return render_template('list_items.html', items=items_list)
 
