@@ -118,7 +118,7 @@ def create_item():
 
 @items.route('/items/<int:item_id>', methods=['GET', 'PUT'])
 def update_item(item_id):
-    """Update a junk item, optionally with a new photo."""
+    """Update a junk item, optionally with a new photo (PUT)."""
     item = db.session.get(JunkItem, item_id)
     if item is None:
         return jsonify({'error': 'Item not found'}), 404
