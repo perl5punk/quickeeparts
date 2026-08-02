@@ -1,5 +1,6 @@
 """Fixtures for photo upload tests."""
 import os
+import sqlite3
 import pytest
 
 
@@ -7,19 +8,17 @@ import pytest
 def _clean_junk_item_table():
     """Clear the junk_item table and reset autoincrement before each test."""
     from app import app
-
-    with app.app_context():
-        from app.models import db
-        db.session.query(db.Model).filter(
-            db.Model.__tablename__ == 'junk_item'
-        ).delete(synchronize_session='fetch')
-        db.session.commit()
-
-        # Reset SQLite autoincrement counter so next item gets id=1
-        db.session.execute(db.text("DELETE FROM sqlite_sequence WHERE name='junk_item'"))
-        db.session.commit()
-
     ROOT = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(app.instance_path, 'junk.db')
+
+    # Clear junk_item table using raw SQL (avoids ORM issues)
+    with app.app_context():
+        conn = sqlite3.connect(db_path)
+        conn.execute("DELETE FROM junk_item")
+        conn.execute("DELETE FROM sqlite_sequence WHERE name='junk_item'")
+        conn.commit()
+        conn.close()
+
     upload_dir = os.path.join(ROOT, 'static', 'uploads')
 
     # Clean uploads directory
@@ -27,7 +26,11 @@ def _clean_junk_item_table():
         for f in os.listdir(upload_dir):
             fp = os.path.join(upload_dir, f)
             try:
-                os.remove(fp)
+                if os.path.isfile(fp):
+                    os.remove(fp)
+                else:
+                    import shutil
+                    shutil.rmtree(fp)
             except OSError:
                 pass
         thumb_dir = os.path.join(upload_dir, 'thumbnails')
