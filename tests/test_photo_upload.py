@@ -240,7 +240,29 @@ def test_create_item_name_required():
         assert 'error' in body
 
 
-# ─── Acceptance Criterion: Image resized on upload, original not kept ─────────
+# ─── Acceptance Criterion: Upload validation rejects files larger than 20MB ────
+
+def test_upload_rejects_file_larger_than_20mb():
+    """Files larger than 20MB are rejected with JSON 400 error."""
+    from app import app
+    with app.test_client() as c:
+        # Create a 25MB file (well above the 20MB limit)
+        big_data = b'\xff\xd8\xff\xe0' + b'\x00' * (25 * 1024 * 1024 - 4)
+        r = c.post('/items', data={
+            'photo': (io.BytesIO(big_data), 'bigfile.jpg'),
+            'name': 'Too Big',
+        }, content_type='multipart/form-data')
+        assert r.status_code == 400, (
+            f"Expected 400 for >20MB file, got {r.status_code}: {r.data[:200]}"
+        )
+        body = r.get_json(force=True)
+        assert 'error' in body, f"Expected JSON error response, got: {r.data[:200]}"
+        assert 'too large' in body['error'].lower() or '20mb' in body['error'].lower(), (
+            f"Error message should mention size limit: {body['error']}"
+        )
+
+
+def test_image_is_resized_on_upload():
 
 def test_image_is_resized_on_upload():
     """After upload, the stored image is resized (not the original 1x1 JPEG bytes)."""
