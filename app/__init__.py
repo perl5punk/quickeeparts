@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, g
 from app.models import db
 import os
+import uuid
 
 app = Flask(__name__, template_folder='../templates')
 app.config['SECRET_KEY'] = 'dev-secret-key'
@@ -11,9 +12,6 @@ UPLOAD_FOLDER = os.path.join(app.instance_path, 'photos')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['DATABASE'] = os.path.join(app.instance_path, 'junk.db')
 DATABASE = app.config['DATABASE']
-
-ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
-ALLOWED_MIME_TYPES = {'image/jpeg', 'image/png'}
 
 # Ensure instance and upload directories exist
 os.makedirs(app.instance_path, exist_ok=True)
@@ -49,8 +47,8 @@ with app.app_context():
 
 # ─── Backward-compatible routes using the legacy junk table ───
 
-ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
-ALLOWED_MIME_TYPES = {'image/jpeg', 'image/png'}
+LEGACY_ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
+LEGACY_ALLOWED_MIME_TYPES = {'image/jpeg', 'image/png'}
 
 
 def _secure_filename(filename):
@@ -88,9 +86,6 @@ def index():
 @app.route('/add', methods=['GET', 'POST'])
 def add():
     """Handle GET (show form) and POST (save item) for adding junk."""
-    import sqlite3
-    import uuid
-
     if request.method == 'POST':
         name = request.form.get('name', '')
         description = request.form.get('description', '')
@@ -101,10 +96,10 @@ def add():
         if file and file.filename != '':
             # Validate file extension
             ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
-            if ext not in ALLOWED_EXTENSIONS:
+            if ext not in LEGACY_ALLOWED_EXTENSIONS:
                 return f'Invalid file type: "{ext}". Allowed types: jpg, jpeg, png', 400
             # Validate MIME type
-            if file.mimetype not in ALLOWED_MIME_TYPES:
+            if file.mimetype not in LEGACY_ALLOWED_MIME_TYPES:
                 return f'Invalid MIME type: "{file.mimetype}". Allowed types: image/jpeg, image/png', 400
             # Save file securely
             safe_name = _secure_filename(file.filename)
@@ -130,7 +125,5 @@ def list_items_legacy():
     ).fetchall()
     return render_template('list.html', items=items)
 
-from app import routes
 
-if __name__ == '__main__':
-    app.run(debug=True)
+from app import routes
