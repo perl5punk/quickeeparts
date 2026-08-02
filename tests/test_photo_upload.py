@@ -263,8 +263,6 @@ def test_upload_rejects_file_larger_than_20mb():
 
 
 def test_image_is_resized_on_upload():
-
-def test_image_is_resized_on_upload():
     """After upload, the stored image is resized (not the original 1x1 JPEG bytes)."""
     from app import app
     import os
