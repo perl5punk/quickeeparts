@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ item.name }} — QuickeeParts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        h1 { color: #333; }
+        nav a { margin-right: 15px; }
+        .item-detail { margin-top: 20px; }
+        .item-detail img {
+            max-width: 100%;
+            max-height: 600px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .item-detail p { margin: 8px 0; }
+        .actions { margin-top: 20px; }
+        .actions a { color: #0066cc; text-decoration: none; margin-right: 15px; }
+        .actions a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>{{ item.name }}</h1>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/items">View All Junk</a>
+    </nav>
+    <div class="item-detail">
+        {% if item.photo_filename %}
+            <img src="/static/uploads/{{ item.photo_filename }}" alt="{{ item.name }}">
+        {% else %}
+            <img src="/static/images/placeholder.png" alt="No photo">
+        {% endif %}
+        <p><strong>Description:</strong> {{ item.description or 'No description' }}</p>
+        <p><strong>Category:</strong> {{ item.category or 'N/A' }}</p>
+        <p><strong>Status:</strong> {{ item.status or 'pending' }}</p>
+        <p><strong>Condition:</strong> {{ item.condition or 'N/A' }}</p>
+        <p><small>Added: {{ item.created_at.strftime('%Y-%m-%d %H:%M') if item.created_at else 'Unknown' }}</small></p>
+    </div>
+    <div class="actions">
+        <a href="/items/{{ item.id }}/edit">Edit this item</a>
+        <a href="#" onclick="if(confirm('Are you sure?')){ document.getElementById('delete-form').submit(); }">Delete this item</a>
+    </div>
+    <form id="delete-form" method="POST" action="/items/{{ item.id }}" style="display: none;">
+        <input type="hidden" name="_method" value="DELETE">
+    </form>
+</body>
+</html>

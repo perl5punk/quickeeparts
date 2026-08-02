@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ item.name }} - QuickeeParts{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Edit Item</h2>
+</div>
+
+<div class="form-container">
+    <form id="editItemForm" action="/items/{{ item.id }}" method="PUT" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="name">Item Name *</label>
+            <input type="text" id="name" name="name" required value="{{ item.name }}" placeholder="Enter item name">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" placeholder="Describe the item">{{ item.description or '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="category">Category</label>
+            <input type="text" id="category" name="category" value="{{ item.category or '' }}" placeholder="e.g., Electronics, Hardware, Mechanical">
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="pending" {{ 'selected' if item.status == 'pending' }}>Pending</option>
+                <option value="approved" {{ 'selected' if item.status == 'approved' }}>Approved</option>
+                <option value="listed" {{ 'selected' if item.status == 'listed' }}>Listed</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="condition">Condition</label>
+            <input type="text" id="condition" name="condition" value="{{ item.condition or '' }}" placeholder="e.g., New, Used, Damaged">
+        </div>
+
+        <div class="form-group">
+            <label>Current Photo</label>
+            {% if item.photo_filename %}
+            <div>
+                <img src="/static/uploads/thumbnails/{{ item.photo_filename.rsplit('.', 1)[0] }}_thumb.jpg"
+                     alt="{{ item.name }}"
+                     style="max-width: 200px; max-height: 200px; border-radius: 4px;"
+                     onerror="this.onerror=null; this.src='/static/images/placeholder.png';">
+                <p style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">Current photo uploaded</p>
+            </div>
+            {% else %}
+            <p style="color: #999;">No photo uploaded</p>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="photo">Upload New Photo</label>
+            <input type="file" id="photo" name="photo" accept="image/jpeg,image/png,image/gif">
+            <p class="form-hint">Accepted formats: JPG, PNG, GIF. Max 20MB.</p>
+            <p id="photoError" class="form-error" style="display: none;"></p>
+            <p id="photoSuccess" class="form-success" style="display: none;"></p>
+        </div>
+
+        <input type="hidden" name="photo_filename" value="{{ item.photo_filename or '' }}">
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Update Item</button>
+            <a href="/items/{{ item.id }}" class="btn">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const photoInput = document.getElementById('photo');
+    const photoError = document.getElementById('photoError');
+    const photoSuccess = document.getElementById('photoSuccess');
+
+    photoInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        photoError.style.display = 'none';
+        photoSuccess.style.display = 'none';
+
+        if (!file) return;
+
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!validTypes.includes(file.type)) {
+            photoError.textContent = 'Invalid file type. Only JPG, PNG, and GIF files are allowed.';
+            photoError.style.display = 'block';
+            photoSuccess.style.display = 'none';
+            e.target.value = '';
+            return;
+        }
+
+        // Validate file size (20MB max)
+        const maxSize = 20 * 1024 * 1024; // 20MB
+        if (file.size > maxSize) {
+            photoError.textContent = 'File too large. Maximum size is 20MB.';
+            photoError.style.display = 'block';
+            photoSuccess.style.display = 'none';
+            e.target.value = '';
+            return;
+        }
+
+        // Validation passed
+        photoSuccess.textContent = 'Photo uploaded successfully';
+        photoSuccess.style.display = 'block';
+        photoError.style.display = 'none';
+    });
+
+    document.getElementById('editItemForm').addEventListener('submit', function(e) {
+        if (photoError.style.display === 'block') {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}
