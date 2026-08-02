@@ -1,16 +1,17 @@
 """Fixtures for photo upload tests."""
 import os
+import sqlite3
 import pytest
 
 
 @pytest.fixture(autouse=True)
 def _clean_junk_item_table():
-    """Clear the junk_item table and reset autoincrement before each test."""
+    """Clear the junk_item table, reset autoincrement, and clean uploads before each test."""
     from app import app
-    upload_dir = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        'static', 'uploads'
-    )
+    ROOT = os.path.dirname(os.path.abspath(__file__))
+    upload_dir = os.path.join(ROOT, 'static', 'uploads')
+
+    # Clean uploads directory
     if os.path.exists(upload_dir):
         for f in os.listdir(upload_dir):
             fp = os.path.join(upload_dir, f)
@@ -26,4 +27,5 @@ def _clean_junk_item_table():
                     os.remove(fp)
                 except OSError:
                     pass
+
     yield
