@@ -8,7 +8,7 @@ import pytest
 def _clean_junk_item_table():
     """Clear the junk_item table and reset autoincrement before each test."""
     from app import app
-    ROOT = os.path.dirname(os.path.abspath(__file__))
+    import os
     db_path = os.path.join(app.instance_path, 'junk.db')
 
     # Clear junk_item table using raw SQL (avoids ORM issues)
@@ -19,7 +19,8 @@ def _clean_junk_item_table():
         conn.commit()
         conn.close()
 
-    upload_dir = os.path.join(ROOT, 'static', 'uploads')
+    # Clean uploads directory using the same path the app uses (relative to app root)
+    upload_dir = os.path.normpath(os.path.join(app.root_path, '..', 'static', 'uploads'))
 
     # Clean uploads directory (but not images which contains placeholder)
     if os.path.exists(upload_dir):
