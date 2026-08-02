@@ -67,7 +67,7 @@ def items_route():
     return render_template('list_items.html', items=items_list)
 
 
-@items.route('/items/<int:item_id>')
+@items.route('/items/<int:item_id>', methods=['GET'])
 def item_detail(item_id):
     """Show a single junk item detail page with full-size photo."""
     item = db.session.get(JunkItem, item_id)
@@ -76,49 +76,18 @@ def item_detail(item_id):
     return render_template('item_detail.html', item=item)
 
 
-@items.route('/items/new', methods=['GET', 'POST'])
-def create_item():
-    """Create a new junk item with optional photo upload."""
-    if request.method == 'POST':
-        name = request.form.get('name', '').strip()
-        description = request.form.get('description', '').strip()
-        category = request.form.get('category', '').strip()
-        status = request.form.get('status', 'pending')
-        condition = request.form.get('condition', '').strip()
-
-        if not name:
-            return jsonify({'error': 'Item name is required'}), 400
-
-        item = JunkItem(
-            name=name,
-            description=description,
-            category=category,
-            status=status,
-            condition=condition,
-        )
-        db.session.add(item)
-        db.session.flush()  # Get item.id
-
-        # Handle photo upload
-        photo_filename, upload_error = handle_photo_upload(item.id)
-        if upload_error:
-            db.session.rollback()
-            return jsonify({'error': upload_error}), 400
-        item.photo_filename = photo_filename
-
-        db.session.commit()
-        return jsonify({
-            'message': 'Item created successfully',
-            'item_id': item.id,
-            'photo_filename': photo_filename
-        }), 201
-
-    return render_template('create_item.html')
+@items.route('/items/<int:item_id>/edit', methods=['GET'])
+def edit_item(item_id):
+    """Show the edit form for a junk item."""
+    item = db.session.get(JunkItem, item_id)
+    if item is None:
+        return jsonify({'error': 'Item not found'}), 404
+    return render_template('edit_item.html', item=item)
 
 
-@items.route('/items/<int:item_id>', methods=['GET', 'PUT'])
+@items.route('/items/<int:item_id>', methods=['PUT'])
 def update_item(item_id):
-    """Update a junk item, optionally with a new photo (PUT)."""
+    """Update a junk item, optionally with a new photo."""
     item = db.session.get(JunkItem, item_id)
     if item is None:
         return jsonify({'error': 'Item not found'}), 404
