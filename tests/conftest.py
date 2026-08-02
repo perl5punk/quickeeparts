@@ -21,7 +21,7 @@ def _clean_junk_item_table():
 
     upload_dir = os.path.join(ROOT, 'static', 'uploads')
 
-    # Clean uploads directory
+    # Clean uploads directory (but not images which contains placeholder)
     if os.path.exists(upload_dir):
         for f in os.listdir(upload_dir):
             fp = os.path.join(upload_dir, f)
