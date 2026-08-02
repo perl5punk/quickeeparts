@@ -134,3 +134,13 @@ def list_items_legacy():
 
 
 from app import routes
+from app.models import db
+
+# Initialize SQLAlchemy with the app
+db.init_app(app)
+
+# Register the items blueprint
+app.register_blueprint(routes.items)
+
+# Register the legacy blueprint
+app.register_blueprint(routes.legacy)
