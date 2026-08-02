@@ -229,8 +229,8 @@ def handle_photo_upload(item_id):
     # Save original to temp location first
     upload_dir = os.path.join(current_app.root_path, '..', 'static', 'uploads')
     os.makedirs(upload_dir, exist_ok=True)
-
-    temp_path = os.path.join(upload_dir, f'temp_{unique_id}')
+    temp_unique = str(uuid.uuid4())[:8]
+    temp_path = os.path.join(upload_dir, f'temp_{temp_unique}')
 
     # Read file content and save to temp
     file_data = file.read()
