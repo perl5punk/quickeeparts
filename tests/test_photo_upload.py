@@ -599,6 +599,7 @@ def test_edit_item_photo_replacement_old_thumb_gone():
     """When editing with a new photo, the old thumbnail is also deleted."""
     from app import app
     import os
+    import time
     with app.test_client() as c:
         jpeg1 = _minimal_jpeg()
         r1 = c.post('/items', data={
@@ -611,11 +612,15 @@ def test_edit_item_photo_replacement_old_thumb_gone():
         from app.junk_item import JunkItem
         item = JunkItem.query.get(item_id)
         upload_dir = os.path.join(app.root_path, '..', 'static', 'uploads')
-        old_thumb = os.path.join(
+        old_photo = item.photo_filename
+        old_thumb_path = os.path.join(
             upload_dir, 'thumbnails',
-            f'{item.photo_filename.rsplit(".", 1)[0]}_thumb.jpg'
+            f'{old_photo.rsplit(".", 1)[0]}_thumb.jpg'
         )
-        assert os.path.exists(old_thumb)
+        assert os.path.exists(old_thumb_path)
+
+        # Small delay to ensure the new upload gets a different timestamp/filename
+        time.sleep(0.05)
 
         jpeg2 = _minimal_png()
         r2 = c.put(f'/items/{item_id}', data={
@@ -625,12 +630,15 @@ def test_edit_item_photo_replacement_old_thumb_gone():
         assert r2.status_code == 200
 
         item = JunkItem.query.get(item_id)
-        new_thumb = os.path.join(
+        new_photo = item.photo_filename
+        new_thumb_path = os.path.join(
             upload_dir, 'thumbnails',
-            f'{item.photo_filename.rsplit(".", 1)[0]}_thumb.jpg'
+            f'{new_photo.rsplit(".", 1)[0]}_thumb.jpg'
         )
-        assert not os.path.exists(old_thumb), "Old thumbnail should be deleted"
-        assert os.path.exists(new_thumb), "New thumbnail should exist"
+        # Old and new photos have different filenames now (due to time.sleep),
+        # so we can verify the old thumbnail was deleted and the new one exists
+        assert not os.path.exists(old_thumb_path), "Old thumbnail should be deleted"
+        assert os.path.exists(new_thumb_path), "New thumbnail should exist"
 
 
 # ─── Acceptance Criterion: JSON error response on validation failure ──────────
