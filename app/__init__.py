@@ -5,7 +5,7 @@ import uuid
 
 app = Flask(__name__, template_folder='../templates')
 app.config['SECRET_KEY'] = 'dev-secret-key'
-app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024  # 20MB
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB for legacy route compatibility
 
 # Backward-compatible config for legacy app.py tests
 UPLOAD_FOLDER = os.path.join(app.instance_path, 'photos')
