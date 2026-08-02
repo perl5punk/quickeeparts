@@ -182,6 +182,12 @@ def update_item(item_id):
         item.photo_filename = photo_filename
     # If no new photo uploaded, keep the existing item.photo_filename as-is
 
+    db.session.commit()
+    return jsonify({
+        'message': 'Item updated successfully',
+        'item_id': item.id,
+        'photo_filename': item.photo_filename
+    })
 
 
 def handle_photo_upload(item_id):
