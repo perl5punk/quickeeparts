@@ -117,6 +117,12 @@ def add():
 
         file = request.files.get('photo')
         if file and file.filename != '':
+            # Validate file size (legacy 5MB limit for backward compatibility)
+            file.seek(0, 2)
+            file_size = file.tell()
+            file.seek(0)
+            if file_size > 5 * 1024 * 1024:
+                return 'File too large. Maximum size is 5 MB (5242880 bytes).', 400
             # Validate file extension
             ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
             if ext not in LEGACY_ALLOWED_EXTENSIONS:
