@@ -224,7 +224,8 @@ def handle_photo_upload(item_id):
     # Generate unique filename
     ext = filename_orig.rsplit('.', 1)[1].lower()
     timestamp = str(int(time.time()))
-    photo_filename = f'{item_id}_{timestamp}.{ext}'
+    unique_id = str(uuid.uuid4())[:8]
+    photo_filename = f'{item_id}_{unique_id}_{timestamp}.{ext}'
 
     # Save original to temp location first
     upload_dir = os.path.join(current_app.root_path, '..', 'static', 'uploads')
