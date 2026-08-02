@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, g, request
+from flask import Flask, jsonify, render_template, redirect, url_for, g, request
 from app.models import db
 from werkzeug.exceptions import RequestEntityTooLarge
 import os
