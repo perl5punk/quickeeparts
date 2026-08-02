@@ -137,6 +137,7 @@ from app import routes
 from app.models import db
 
 # Initialize SQLAlchemy with the app
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{app.config["DATABASE"]}'
 db.init_app(app)
 
 # Register the items blueprint
