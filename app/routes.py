@@ -4,16 +4,18 @@ import uuid
 from datetime import datetime
 
 from flask import (
-    Blueprint, current_app, jsonify, redirect, render_template,
+    Blueprint, current_app, g, jsonify, redirect, render_template,
     request, send_from_directory, url_for
 )
 from PIL import Image
 from werkzeug.utils import secure_filename
+from werkzeug.exceptions import RequestEntityTooLarge
 
 from app.models import db
 from app.junk_item import JunkItem
 
 items = Blueprint('items', __name__)
+legacy = Blueprint('legacy', __name__)
 
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
 ALLOWED_MIME_TYPES = {'image/jpeg', 'image/png', 'image/gif'}
