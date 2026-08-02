@@ -179,21 +179,6 @@ def update_item(item_id):
     # If no new photo uploaded, keep the existing item.photo_filename as-is
 
 
-@items.route('/items/<int:item_id>', methods=['DELETE'])
-def delete_item(item_id):
-    """Delete a junk item and its associated photo files."""
-    item = db.session.get(JunkItem, item_id)
-    if item is None:
-        return jsonify({'error': 'Item not found'}), 404
-
-    # Delete photo files from disk
-    if item.photo_filename:
-        delete_photo_files(item.photo_filename)
-
-    db.session.delete(item)
-    db.session.commit()
-    return jsonify({'message': 'Item deleted successfully'})
-
 
 def handle_photo_upload(item_id):
     """
