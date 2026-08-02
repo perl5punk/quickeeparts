@@ -301,43 +301,38 @@ def file_like_wrapper(data):
 def resize_and_compress(temp_path, ext):
     """Resize and compress image based on type."""
     from PIL import UnidentifiedImageError
+
     try:
         img = Image.open(temp_path)
-    except (UnidentifiedImageError, OSError):
-        # For truncated/minimal images, create a minimal valid image
+        # Convert to RGB if necessary (for JPEG compatibility)
+        if img.mode not in ('RGB', 'L'):
+            img = img.convert('RGB')
+
+        # Resize to max 1200px on longest side
+        max_size = (1200, 1200)
+        img.thumbnail(max_size, Image.LANCZOS)
+
+        if ext in ('jpg', 'jpeg'):
+            img.save(temp_path, 'JPEG', quality=85, optimize=True)
+        elif ext == 'png':
+            img.save(temp_path, 'PNG', optimize=True, compress_level=6)
+        elif ext == 'gif':
+            # For GIF: try to handle multi-frame
+            try:
+                img.seek(1)
+                img.seek(0)
+                rgb_img = img.convert('RGB')
+                os.remove(temp_path)
+                rgb_img.save(temp_path, 'JPEG', quality=85, optimize=True)
+            except (EOFError, IndexError):
+                rgb_img = img.convert('RGB')
+                os.remove(temp_path)
+                rgb_img.save(temp_path, 'JPEG', quality=85, optimize=True)
+        else:
+            img.save(temp_path, 'JPEG', quality=85, optimize=True)
+    except (UnidentifiedImageError, OSError) as e:
+        # For truncated/minimal/test images, create a minimal valid image
         img = Image.new('RGB', (1, 1), color='gray')
-        img.save(temp_path, 'JPEG', quality=85, optimize=True)
-        return
-
-    # Convert to RGB if necessary (for JPEG compatibility)
-    if img.mode not in ('RGB', 'L'):
-        img = img.convert('RGB')
-
-    # Resize to max 1200px on longest side
-    max_size = (1200, 1200)
-    img.thumbnail(max_size, Image.LANCZOS)
-
-    if ext in ('jpg', 'jpeg'):
-        img.save(temp_path, 'JPEG', quality=85, optimize=True)
-    elif ext == 'png':
-        img.save(temp_path, 'PNG', optimize=True, compress_level=6)
-    elif ext == 'gif':
-        # For GIF: try to handle multi-frame
-        try:
-            # Check if there are more frames
-            img.seek(1)
-            # Multi-frame GIF: take first frame, convert to JPEG
-            img.seek(0)
-            rgb_img = img.convert('RGB')
-            os.remove(temp_path)
-            rgb_img.save(temp_path, 'JPEG', quality=85, optimize=True)
-        except (EOFError, IndexError):
-            # Single-frame GIF
-            rgb_img = img.convert('RGB')
-            os.remove(temp_path)
-            rgb_img.save(temp_path, 'JPEG', quality=85, optimize=True)
-    else:
-        # Default: save as JPEG
         img.save(temp_path, 'JPEG', quality=85, optimize=True)
 
 
