@@ -376,16 +376,6 @@ def delete_photo_files(photo_filename):
         os.remove(thumb_path)
 
 
-def ensure_static_dirs():
-    """Ensure static directories exist."""
-    upload_dir = os.path.join(current_app.root_path, '..', 'static', 'uploads')
-    thumb_dir = os.path.join(upload_dir, 'thumbnails')
-    images_dir = os.path.join(current_app.root_path, '..', 'static', 'images')
-    os.makedirs(upload_dir, exist_ok=True)
-    os.makedirs(thumb_dir, exist_ok=True)
-    os.makedirs(images_dir, exist_ok=True)
-
-
 # Serve thumbnail images
 @items.route('/static/uploads/thumbnails/<path:filename>')
 def serve_thumbnail(filename):
