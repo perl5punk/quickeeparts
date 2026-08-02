@@ -125,13 +125,23 @@ def edit_item(item_id):
     return render_template('edit_item.html', item=item)
 
 
-@items.route('/items/<int:item_id>', methods=['PUT'])
+@items.route('/items/<int:item_id>', methods=['PUT', 'DELETE'])
 def update_item(item_id):
-    """Update a junk item, optionally with a new photo."""
+    """Update or delete a junk item."""
     item = db.session.get(JunkItem, item_id)
     if item is None:
         return jsonify({'error': 'Item not found'}), 404
 
+    # Handle DELETE
+    if request.method == 'DELETE':
+        # Delete photo files from disk
+        if item.photo_filename:
+            delete_photo_files(item.photo_filename)
+        db.session.delete(item)
+        db.session.commit()
+        return jsonify({'message': 'Item deleted successfully'})
+
+    # Handle PUT (update)
     # Handle form data or JSON
     if request.is_json:
         data = request.get_json()
@@ -156,24 +166,17 @@ def update_item(item_id):
     item.status = status
     item.condition = condition
 
-    # Handle photo upload - delete old photos first if new photo uploaded
-    photo_filename = request.form.get('photo_filename') if not request.is_json else None
+    # Handle photo upload - only set new filename if a new photo was uploaded
+    # Delete old photo files before saving new ones
     if 'photo' in request.files and request.files['photo'].filename:
-        # Delete old photo files before saving new ones
         if item.photo_filename:
             delete_photo_files(item.photo_filename)
         photo_filename, upload_error = handle_photo_upload(item.id)
         if upload_error:
             db.session.rollback()
             return jsonify({'error': upload_error}), 400
-    item.photo_filename = photo_filename
-
-    db.session.commit()
-    return jsonify({
-        'message': 'Item updated successfully',
-        'item_id': item.id,
-        'photo_filename': photo_filename
-    })
+        item.photo_filename = photo_filename
+    # If no new photo uploaded, keep the existing item.photo_filename as-is
 
 
 @items.route('/items/<int:item_id>', methods=['DELETE'])
