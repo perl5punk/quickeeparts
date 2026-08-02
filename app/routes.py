@@ -132,51 +132,48 @@ def update_item(item_id):
     if item is None:
         return jsonify({'error': 'Item not found'}), 404
 
-    if request.method == 'PUT':
-        # Handle form data or JSON
-        if request.is_json:
-            data = request.get_json()
-            name = data.get('name', '').strip() if data.get('name') else ''
-            description = data.get('description', '').strip() if data.get('description') else ''
-            category = data.get('category', '').strip()
-            status = data.get('status', 'pending')
-            condition = data.get('condition', '').strip()
-        else:
-            name = request.form.get('name', '').strip()
-            description = request.form.get('description', '').strip()
-            category = request.form.get('category', '').strip()
-            status = request.form.get('status', 'pending')
-            condition = request.form.get('condition', '').strip()
+    # Handle form data or JSON
+    if request.is_json:
+        data = request.get_json()
+        name = data.get('name', '').strip() if data.get('name') else ''
+        description = data.get('description', '').strip() if data.get('description') else ''
+        category = data.get('category', '').strip()
+        status = data.get('status', 'pending')
+        condition = data.get('condition', '').strip()
+    else:
+        name = request.form.get('name', '').strip()
+        description = request.form.get('description', '').strip()
+        category = request.form.get('category', '').strip()
+        status = request.form.get('status', 'pending')
+        condition = request.form.get('condition', '').strip()
 
-        if not name:
-            return jsonify({'error': 'Item name is required'}), 400
+    if not name:
+        return jsonify({'error': 'Item name is required'}), 400
 
-        item.name = name
-        item.description = description
-        item.category = category
-        item.status = status
-        item.condition = condition
+    item.name = name
+    item.description = description
+    item.category = category
+    item.status = status
+    item.condition = condition
 
-        # Handle photo upload - delete old photos first if new photo uploaded
-        photo_filename = request.form.get('photo_filename') if not request.is_json else None
-        if 'photo' in request.files and request.files['photo'].filename:
-            # Delete old photo files before saving new ones
-            if item.photo_filename:
-                delete_photo_files(item.photo_filename)
-            photo_filename, upload_error = handle_photo_upload(item.id)
-            if upload_error:
-                db.session.rollback()
-                return jsonify({'error': upload_error}), 400
-        item.photo_filename = photo_filename
+    # Handle photo upload - delete old photos first if new photo uploaded
+    photo_filename = request.form.get('photo_filename') if not request.is_json else None
+    if 'photo' in request.files and request.files['photo'].filename:
+        # Delete old photo files before saving new ones
+        if item.photo_filename:
+            delete_photo_files(item.photo_filename)
+        photo_filename, upload_error = handle_photo_upload(item.id)
+        if upload_error:
+            db.session.rollback()
+            return jsonify({'error': upload_error}), 400
+    item.photo_filename = photo_filename
 
-        db.session.commit()
-        return jsonify({
-            'message': 'Item updated successfully',
-            'item_id': item.id,
-            'photo_filename': photo_filename
-        })
-
-    return render_template('edit_item.html', item=item)
+    db.session.commit()
+    return jsonify({
+        'message': 'Item updated successfully',
+        'item_id': item.id,
+        'photo_filename': photo_filename
+    })
 
 
 @items.route('/items/<int:item_id>', methods=['DELETE'])
