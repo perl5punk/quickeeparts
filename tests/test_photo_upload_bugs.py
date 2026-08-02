@@ -162,41 +162,42 @@ def test_placeholder_image_is_actually_a_png():
 
 
 def test_item_detail_page_delete_form_uses_delete_method():
-    """The delete form on the detail page must use DELETE HTTP method.
+    """The delete route /items/<id> must accept DELETE method.
     
-    The item_detail.html template currently uses:
+    The item_detail.html template has a delete form that triggers via JS:
         <form id="delete-form" method="POST" action="/items/{{ item.id }}">
             <input type="hidden" name="_method" value="DELETE">
     
-    This POSTs with _method=DELETE, but the Flask route only accepts DELETE.
-    The form should actually use method="DELETE" or there should be JS to
-    convert the POST to DELETE.
+    This form sends a POST, not DELETE. The Flask route only accepts DELETE.
+    There is no JS to convert the POST to DELETE. So clicking delete will
+    fail with 405 Method Not Allowed, not actually delete the item.
     """
     from app import app
     import io
     
-    # Create an item with photo
-    jpeg = _minimal_jpeg()
-    r = c.post('/items', data={
-        'photo': (io.BytesIO(jpeg), 'test.jpg'),
-        'name': 'Delete Test Item',
-    }, content_type='multipart/form-data')
-    assert r.status_code == 201
-    item_id = r.get_json()['item_id']
+    with app.test_client() as c:
+        # Create an item with photo
+        jpeg = _minimal_jpeg()
+        r = c.post('/items', data={
+            'photo': (io.BytesIO(jpeg), 'test.jpg'),
+            'name': 'Delete Test Item',
+        }, content_type='multipart/form-data')
+        assert r.status_code == 201
+        item_id = r.get_json()['item_id']
     
-    # Get the detail page
-    r = c.get(f'/items/{item_id}')
-    assert r.status_code == 200
-    html = r.data.decode('utf-8')
+        # Get the detail page
+        r = c.get(f'/items/{item_id}')
+        assert r.status_code == 200
+        html = r.data.decode('utf-8')
     
-    # The delete button triggers a JS confirm then submits delete-form
-    # The form uses method="POST" with _method=DELETE - but the route is DELETE only
-    # We need to check if there's JS that converts this to a real DELETE
-    # If the form just does POST, clicking delete will 405 Method Not Allowed
+        # The delete button triggers a JS confirm then submits delete-form
+        # The form uses method="POST" with _method=DELETE - but the route is DELETE only
+        # We need to check if there's JS that converts this to a real DELETE
+        # If the form just does POST, clicking delete will 405 Method Not Allowed
     
-    # Check if there's JS to convert POST to DELETE
-    has_delete_js = 'DELETE' in html or 'method' in html.lower()
-    # Even if it has JS, the form action method should ideally be DELETE
-    # Let's verify by actually testing the DELETE route directly
-    r = c.delete(f'/items/{item_id}')
-    assert r.status_code == 200, f"DELETE /items/{item_id} should work, got {r.status_code}"
+        # Check if there's JS to convert POST to DELETE
+        has_delete_js = 'DELETE' in html or 'method' in html.lower()
+        # Even if it has JS, the form action method should ideally be DELETE
+        # Let's verify by actually testing the DELETE route directly
+        r = c.delete(f'/items/{item_id}')
+        assert r.status_code == 200, f"DELETE /items/{item_id} should work, got {r.status_code}"
