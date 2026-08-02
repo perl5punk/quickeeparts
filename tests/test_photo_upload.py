@@ -266,6 +266,7 @@ def test_image_is_resized_on_upload():
     """After upload, the stored image is resized (not the original 1x1 JPEG bytes)."""
     from app import app
     import os
+    import struct
     from PIL import Image as PILImage
     with app.test_client() as c:
         img = PILImage.new('RGB', (1500, 1000), color='red')
@@ -290,6 +291,26 @@ def test_image_is_resized_on_upload():
         w, h = img2.size
         assert max(w, h) <= 1200, (
             f"Image not resized. Longest side {max(w, h)} > 1200px (got {w}x{h})"
+        )
+        # Verify JPEG quality 85% by inspecting quantization table
+        with open(full_path, 'rb') as f:
+            jpeg_data = f.read()
+        # Find DQT (0xFFDB) for table 0 (Y channel)
+        idx = 0
+        qtable = None
+        while idx < len(jpeg_data) - 5:
+            if jpeg_data[idx] == 0xFF and jpeg_data[idx+1] == 0xDB:
+                tqt = jpeg_data[idx+4]
+                if (tqt & 0x0F) == 0:
+                    qtable = list(jpeg_data[idx+5:idx+5+64])
+                    break
+            idx += 1
+        assert qtable is not None, "Could not find JPEG quantization table"
+        avg_qtable = sum(qtable) / 64
+        # For quality=85, PIL produces avg_qtable ~17.3; quality=75 gives ~29, quality=90 gives ~11.5
+        assert 13 < avg_qtable < 22, (
+            f"JPEG quality not ~85%. Avg quantization table value = {avg_qtable:.1f} "
+            f"(expected ~17.3 for quality=85; quality=75 gives ~29, quality=90 gives ~11.5)"
         )
 
 
