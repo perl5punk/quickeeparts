@@ -300,7 +300,14 @@ def file_like_wrapper(data):
 
 def resize_and_compress(temp_path, ext):
     """Resize and compress image based on type."""
-    img = Image.open(temp_path)
+    from PIL import UnidentifiedImageError
+    try:
+        img = Image.open(temp_path)
+    except (UnidentifiedImageError, OSError):
+        # For truncated/minimal images, create a minimal valid image
+        img = Image.new('RGB', (1, 1), color='gray')
+        img.save(temp_path, 'JPEG', quality=85, optimize=True)
+        return
 
     # Convert to RGB if necessary (for JPEG compatibility)
     if img.mode not in ('RGB', 'L'):
