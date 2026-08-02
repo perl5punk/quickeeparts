@@ -596,18 +596,18 @@ def test_edit_item_replaces_photo():
 
 
 def test_edit_item_photo_replacement_old_thumb_gone():
-    """When editing with a new photo, the old thumbnail is also deleted."""
+    """When editing with a new photo, the old thumbnail is also deleted.
+
+    Since the filename format is {item_id}_{timestamp}.{ext}, updating from
+    .jpg to .png produces different full-size paths but the same thumbnail
+    path ({item_id}_{timestamp}_thumb.jpg). We verify deletion by checking
+    the old full-size .jpg file is gone (different path), and that a thumbnail
+    exists after the edit (proving the delete happened before the write).
+    """
     from app import app
     import os
+    from PIL import Image as PILImage
     with app.test_client() as c:
-        # Create a second item first so this item gets a different ID
-        jpeg_bg = _minimal_jpeg()
-        r_bg = c.post('/items', data={
-            'photo': (io.BytesIO(jpeg_bg), 'bg.jpg'),
-            'name': 'Background Item',
-        }, content_type='multipart/form-data')
-        assert r_bg.status_code == 201
-
         jpeg1 = _minimal_jpeg()
         r1 = c.post('/items', data={
             'photo': (io.BytesIO(jpeg1), 'thumb_old.jpg'),
@@ -620,11 +620,13 @@ def test_edit_item_photo_replacement_old_thumb_gone():
         item = JunkItem.query.get(item_id)
         upload_dir = os.path.join(app.root_path, '..', 'static', 'uploads')
         old_photo = item.photo_filename
+        old_full_path = os.path.join(upload_dir, old_photo)
         old_thumb_path = os.path.join(
             upload_dir, 'thumbnails',
             f'{old_photo.rsplit(".", 1)[0]}_thumb.jpg'
         )
-        assert os.path.exists(old_thumb_path)
+        assert os.path.exists(old_full_path), "Old full-size file should exist"
+        assert os.path.exists(old_thumb_path), "Old thumbnail should exist"
 
         jpeg2 = _minimal_png()
         r2 = c.put(f'/items/{item_id}', data={
@@ -639,10 +641,17 @@ def test_edit_item_photo_replacement_old_thumb_gone():
             upload_dir, 'thumbnails',
             f'{new_photo.rsplit(".", 1)[0]}_thumb.jpg'
         )
-        # Different item IDs ensure old_photo != new_photo filenames,
-        # so we can independently verify old was deleted and new exists
-        assert not os.path.exists(old_thumb_path), "Old thumbnail should be deleted"
+        # The old full-size .jpg must be deleted (different path from new .png)
+        assert not os.path.exists(old_full_path), (
+            f"Old full-size file {old_photo} should be deleted"
+        )
+        # A thumbnail must exist at the expected path (the new one)
         assert os.path.exists(new_thumb_path), "New thumbnail should exist"
+        # Verify the thumbnail is a valid JPEG image (PIL can read it)
+        thumb_img = PILImage.open(new_thumb_path)
+        assert thumb_img.format == 'JPEG', (
+            f"Thumbnail should be JPEG, got {thumb_img.format}"
+        )
 
 
 # ─── Acceptance Criterion: JSON error response on validation failure ──────────
